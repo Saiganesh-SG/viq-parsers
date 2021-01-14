@@ -27,8 +27,9 @@ import org.springframework.stereotype.Service;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import com.csw.data.nvd.jaxb.cwe.Weakness;
 import com.csw.data.nvd.jaxb.cwe.WeaknessCatalog;
+import com.csw.data.nvd.jaxb.cwe.WeaknessCatalog.Weaknesses;
+import com.csw.data.nvd.jaxb.cwe.WeaknessType;
 import com.csw.data.nvd.parser.DataProcessor;
 import com.csw.data.nvd.parser.util.NamespaceFilter;
 import com.csw.data.util.HashingUtil;
@@ -63,17 +64,18 @@ public class CweDataProcessorImpl implements DataProcessor {
 
 		JAXBElement<WeaknessCatalog> element = unmarshaller.unmarshal(source, WeaknessCatalog.class);
 		WeaknessCatalog weaknessCatalog = element.getValue();
-		List<Weakness> weaknesses = weaknessCatalog.getWeaknesses();
+		Weaknesses weaknessesList = weaknessCatalog.getWeaknesses();
+		List<WeaknessType> weaknesses = weaknessesList.getWeakness();
 
 		writeToLiveKeep(weaknesses, sourceFilePath);
 	}
 
-	private void writeToLiveKeep(List<Weakness> weaknesses, String sourceFilePath) {
+	private void writeToLiveKeep(List<WeaknessType> weaknesses, String sourceFilePath) {
 		ObjectMapper mapper = new ObjectMapper();
-		for (Weakness weakness : weaknesses) {
+		for (WeaknessType weakness : weaknesses) {
 			try {
 				String cweLiveKeepDirectory = liveKeepBasePath + cwePath + "/" + ParserConstants.NVD + "/";
-				String cweFile = cweLiveKeepDirectory + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
+				String cweFile = cweLiveKeepDirectory + weakness.getID() + ParserConstants.JSON_FILE_EXTENSION;
 				mapper.writeValue(new File(cweFile), weakness);
 				mapper.writerWithDefaultPrettyPrinter().writeValueAsString(weakness);
 				generateMetaFile(new File(cweFile), sourceFilePath, cweLiveKeepDirectory);
