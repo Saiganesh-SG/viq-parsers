@@ -17,15 +17,26 @@ import com.csw.data.nvd.parser.DataProcessor;
 import com.csw.data.nvd.parser.helper.CweDataHelper;
 import com.csw.data.nvd.pojo.cwe.Reference;
 
+/**
+ * The Class CweDataProcessorImpl.
+ */
 @Service
 @Qualifier("CweDataProcessor")
 public class CweDataProcessorImpl implements DataProcessor {
 
+	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(CweDataProcessorImpl.class);
 	
+	/** The cwe data helper. */
 	@Autowired
 	private CweDataHelper cweDataHelper;
 	
+	/**
+	 * Process.
+	 *
+	 * @param sourceFilePath the source file path
+	 * @throws Exception the exception
+	 */
 	public void process(String sourceFilePath) throws Exception {
 		JAXBContext context = JAXBContext.newInstance(WeaknessCatalog.class);
         Unmarshaller un = context.createUnmarshaller();

@@ -87,29 +87,45 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+/**
+ * The Class CweDataHelper.
+ */
 @Component
 public class CweDataHelper {
 	
+	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(CweDataHelper.class);
 	
+	/** The local flag. */
 	@Value("${data.local.flag}")
 	private boolean localFlag;
 
+	/** The live keep base path. */
 	@Value("${livekeep.base.path}")
 	private String liveKeepBasePath;
 
+	/** The cwe path. */
 	@Value("${cwe.path}")
 	private String cwePath;
 	
+	/** The s 3 bucket name. */
 	@Value("${data.livekeep.bucketName}")
 	private String s3BucketName;
 	
+	/** The mitre url prefix. */
 	@Value("${parse.cwe.mitre.url.prefix}")
 	private String mitreUrlPrefix;
 	
+	/** The amazon S 3 client. */
 	@Autowired
 	private AmazonS3Client amazonS3Client;
 	
+	/**
+	 * Extract external references.
+	 *
+	 * @param externalReferences the external references
+	 * @return the map
+	 */
 	public Map<String, Reference> extractExternalReferences(ExternalReferences externalReferences) {
 		Map<String, Reference> externalReferenceListTemp = new HashMap<>();
 		
@@ -137,6 +153,13 @@ public class CweDataHelper {
 		return externalReferenceListTemp;
 	}
 	
+	/**
+	 * Extract weakness.
+	 *
+	 * @param weaknesses the weaknesses
+	 * @param externalReferenceList the external reference list
+	 * @param sourceFilePath the source file path
+	 */
 	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath) {
 		for (WeaknessType weakness : weaknesses) {
 			WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
@@ -144,6 +167,13 @@ public class CweDataHelper {
 		}
 	}
 
+	/**
+	 * Extract views.
+	 *
+	 * @param viewsType the views type
+	 * @param externalReferenceList the external reference list
+	 * @param sourceFilePath the source file path
+	 */
 	public void extractViews(Views viewsType, Map<String, Reference> externalReferenceList, String sourceFilePath) {
 		if(!CollectionUtils.isEmpty(viewsType.getView())) {
 			for(ViewType viewType: viewsType.getView()) {
@@ -153,6 +183,13 @@ public class CweDataHelper {
 		}
 	}
 	
+	/**
+	 * Extract categories.
+	 *
+	 * @param categories the categories
+	 * @param externalReferenceList the external reference list
+	 * @param sourceFilePath the source file path
+	 */
 	public void extractCategories(Categories categories, Map<String, Reference> externalReferenceList, String sourceFilePath) {
 		if(!CollectionUtils.isEmpty(categories.getCategory())) {
 			for(CategoryType categoryType: categories.getCategory()) {
@@ -162,6 +199,13 @@ public class CweDataHelper {
 		}
 	}
 
+	/**
+	 * Creates the cwe.
+	 *
+	 * @param weaknessType the weakness type
+	 * @param externalReferenceList the external reference list
+	 * @return the weakness root
+	 */
 	private WeaknessRoot createCwe(WeaknessType weaknessType, Map<String, Reference> externalReferenceList) {
 		com.csw.data.nvd.pojo.cwe.WeaknessRoot weakness = new com.csw.data.nvd.pojo.cwe.WeaknessRoot();
 		weakness.setId("CWE-" + weaknessType.getID());
@@ -367,6 +411,13 @@ public class CweDataHelper {
 		return weakness;
 	}
 	
+	/**
+	 * Creates the view.
+	 *
+	 * @param viewType the view type
+	 * @param externalReferenceList the external reference list
+	 * @return the weakness root
+	 */
 	private WeaknessRoot createView(ViewType viewType, Map<String, Reference> externalReferenceList) {
 		com.csw.data.nvd.pojo.cwe.WeaknessRoot weakness = new com.csw.data.nvd.pojo.cwe.WeaknessRoot();
 		weakness.setId("CWE-" + viewType.getID());
@@ -417,6 +468,13 @@ public class CweDataHelper {
 		return weakness;
 	}
 	
+	/**
+	 * Creates the category.
+	 *
+	 * @param categoryType the category type
+	 * @param externalReferenceList the external reference list
+	 * @return the weakness root
+	 */
 	private WeaknessRoot createCategory(CategoryType categoryType, Map<String, Reference> externalReferenceList) {
 		com.csw.data.nvd.pojo.cwe.WeaknessRoot weakness = new com.csw.data.nvd.pojo.cwe.WeaknessRoot();
 		weakness.setId("CWE-" + categoryType.getID());
@@ -467,6 +525,12 @@ public class CweDataHelper {
 		return weakness;
 	}
 	
+	/**
+	 * Write to live keep.
+	 *
+	 * @param weakness the weakness
+	 * @param sourceFilePath the source file path
+	 */
 	private void writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -490,6 +554,13 @@ public class CweDataHelper {
 		}
 	}
 	
+	/**
+	 * Adds the weakness sources.
+	 *
+	 * @param weaknessId the weakness id
+	 * @param sourceName the source name
+	 * @return the list
+	 */
 	private List<Source> addWeaknessSources(String weaknessId, String sourceName) {
 		List<Source> sources = new ArrayList<>();
 		Source source = new Source();
@@ -500,6 +571,13 @@ public class CweDataHelper {
 		return sources;
 	}
 	
+	/**
+	 * Adds the references.
+	 *
+	 * @param referencesType the references type
+	 * @param externalReferenceList the external reference list
+	 * @return the list
+	 */
 	private List<Reference> addReferences(ReferencesType referencesType, Map<String, Reference> externalReferenceList) {
 		List<Reference> referenceList = new ArrayList<>();
 		if(null == referencesType || CollectionUtils.isEmpty(referencesType.getReference())) {
@@ -513,6 +591,12 @@ public class CweDataHelper {
 		return referenceList;
 	}
 	
+	/**
+	 * Adds the content history.
+	 *
+	 * @param contentHistoryType the content history type
+	 * @return the content history root
+	 */
 	private ContentHistoryRoot addContentHistory(ContentHistoryType contentHistoryType) {
 		ContentHistoryRoot contentHistory = new ContentHistoryRoot();
 		contentHistory.setSubmission(addContentHistorySubmission(contentHistoryType.getSubmission()));
@@ -522,6 +606,12 @@ public class CweDataHelper {
 		return contentHistory;
 	}
 	
+	/**
+	 * Adds the content history previous entry details.
+	 *
+	 * @param previousEntryNameList the previous entry name list
+	 * @return the list
+	 */
 	private List<PreviousEntryNameType> addContentHistoryPreviousEntryDetails(List<PreviousEntryName> previousEntryNameList) {
 		List<PreviousEntryNameType> previousEntryNames = new ArrayList<>();
 		if(CollectionUtils.isEmpty(previousEntryNameList)) {
@@ -539,6 +629,12 @@ public class CweDataHelper {
 		return previousEntryNames;
 	}
 
+	/**
+	 * Adds the content history contribution.
+	 *
+	 * @param contributions the contributions
+	 * @return the list
+	 */
 	private List<ContributionType> addContentHistoryContribution(List<Contribution> contributions) {
 		List<ContributionType> contributionTypes = new ArrayList<>();
 		if(CollectionUtils.isEmpty(contributions)) {
@@ -559,6 +655,12 @@ public class CweDataHelper {
 		return contributionTypes;
 	}
 
+	/**
+	 * Adds the content history modification.
+	 *
+	 * @param modifications the modifications
+	 * @return the list
+	 */
 	private List<ModificationType> addContentHistoryModification(List<Modification> modifications) {
 		List<ModificationType> modificationTypes = new ArrayList<>();
 		if(CollectionUtils.isEmpty(modifications)) {
@@ -579,6 +681,12 @@ public class CweDataHelper {
 		return modificationTypes;
 	}
 
+	/**
+	 * Adds the content history submission.
+	 *
+	 * @param submission the submission
+	 * @return the submission root
+	 */
 	private SubmissionRoot addContentHistorySubmission(Submission submission) {
 		if(null == submission) {
 			return null;
@@ -594,6 +702,12 @@ public class CweDataHelper {
 		return submissionRoot;
 	}
 
+	/**
+	 * Adds the reference authors.
+	 *
+	 * @param authors the authors
+	 * @return the list
+	 */
 	private List<String> addReferenceAuthors(List<String> authors) {
 		List<String> authorList = new ArrayList<>();
 		if(!CollectionUtils.isEmpty(authors)) {
@@ -602,6 +716,12 @@ public class CweDataHelper {
 		return authorList;
 	}
 
+	/**
+	 * Adds the mitigation phases.
+	 *
+	 * @param phaseEnumerations the phase enumerations
+	 * @return the list
+	 */
 	private List<String> addMitigationPhases(List<PhaseEnumeration> phaseEnumerations) {
 		List<String> phases = new ArrayList<>();
 		for (PhaseEnumeration phaseEnumeration : phaseEnumerations) {
@@ -610,6 +730,12 @@ public class CweDataHelper {
 		return phases;
 	}
 
+	/**
+	 * Adds the structured types.
+	 *
+	 * @param structuredTextType the structured text type
+	 * @return the list
+	 */
 	private List<String> addStructuredTypes(StructuredTextType structuredTextType) {
 		List<String> structuredNotes = new ArrayList<>();
 		if (null != structuredTextType) {
@@ -622,6 +748,12 @@ public class CweDataHelper {
 		return structuredNotes;
 	}
 
+	/**
+	 * Sets the common consequence scope.
+	 *
+	 * @param scopeEnumerations the scope enumerations
+	 * @return the list
+	 */
 	private List<String> setCommonConsequenceScope(List<ScopeEnumeration> scopeEnumerations) {
 		List<String> scopes = new ArrayList<>();
 		for (ScopeEnumeration scopeEnumeration : scopeEnumerations) {
@@ -630,6 +762,12 @@ public class CweDataHelper {
 		return scopes;
 	}
 
+	/**
+	 * Sets the common consequence impact.
+	 *
+	 * @param impactEnumerations the impact enumerations
+	 * @return the list
+	 */
 	private List<String> setCommonConsequenceImpact(List<TechnicalImpactEnumeration> impactEnumerations) {
 		List<String> technicalImpacts = new ArrayList<>();
 		for (TechnicalImpactEnumeration technicalImpactEnumeration : impactEnumerations) {
@@ -638,6 +776,13 @@ public class CweDataHelper {
 		return technicalImpacts;
 	}
 
+	/**
+	 * Generate meta file.
+	 *
+	 * @param file the file
+	 * @param sourceFilePath the source file path
+	 * @param cweLiveKeepDirectory the cwe live keep directory
+	 */
 	private void generateMetaFile(File file, String sourceFilePath, String cweLiveKeepDirectory) {
 		try {
 			String shaChecksum = HashingUtil.getShaChecksum(file);
@@ -657,6 +802,12 @@ public class CweDataHelper {
 		}
 	}
 	
+	/**
+	 * Xml gregorian calendar to date.
+	 *
+	 * @param urlDate the url date
+	 * @return the date
+	 */
 	private Date xmlGregorianCalendarToDate(XMLGregorianCalendar urlDate) {
 		if(null == urlDate) {
 			return null;
