@@ -25,5 +25,11 @@ public final class ParserConstants {
     
     /** The Constant XML_FILE_EXTENSION. */
     public static final String XML_FILE_EXTENSION = ".xml";
+    
+    /** The Constant HTML_FILE_EXTENSION. */
+    public static final String HTML_FILE_EXTENSION = ".html";
+    
+    /** The Constant DEFAULT_DATE_FORMAT. */
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
 }

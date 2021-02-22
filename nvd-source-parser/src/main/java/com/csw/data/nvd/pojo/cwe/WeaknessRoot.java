@@ -84,7 +84,7 @@ public class WeaknessRoot {
      * 
      */
     @JsonProperty("sources")
-    private List<Object> sources = new ArrayList<Object>();
+    private List<Source> sources = new ArrayList<Source>();
     /**
      * The CWE title attribute
      * <p>
@@ -132,7 +132,7 @@ public class WeaknessRoot {
     @JsonProperty("relatedWeaknesses")
     private List<RelatedWeakness> relatedWeaknesses = new ArrayList<>();
     @JsonProperty("weaknessOrdinalities")
-    private List<Object> weaknessOrdinalities = new ArrayList<Object>();
+    private List<WeaknessOrdinality> weaknessOrdinalities = new ArrayList<>();
     @JsonProperty("applicablePlatforms")
     private ApplicablePlatformsRoot applicablePlatforms;
     @JsonProperty("alternateTerms")

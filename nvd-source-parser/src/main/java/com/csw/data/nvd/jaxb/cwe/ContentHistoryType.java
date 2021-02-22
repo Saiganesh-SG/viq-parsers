@@ -690,60 +690,48 @@ public class ContentHistoryType {
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "content"
+        "submissionName",
+        "submissionOrganization",
+        "submissionDate",
+        "submissionComment"
     })
     public static class Submission {
 
-        @XmlElementRefs({
-            @XmlElementRef(name = "Submission_Date", namespace = "http://cwe.mitre.org/cwe-6", type = JAXBElement.class, required = false),
-            @XmlElementRef(name = "Submission_Name", namespace = "http://cwe.mitre.org/cwe-6", type = JAXBElement.class, required = false),
-            @XmlElementRef(name = "Submission_Comment", namespace = "http://cwe.mitre.org/cwe-6", type = JAXBElement.class, required = false),
-            @XmlElementRef(name = "Submission_Organization", namespace = "http://cwe.mitre.org/cwe-6", type = JAXBElement.class, required = false)
-        })
-        protected List<JAXBElement<?>> content;
+        @XmlElement(name = "Submission_Name")
+        protected String submissionName;
+        @XmlElement(name = "Submission_Organization")
+        protected String submissionOrganization;
+        @XmlElement(name = "Submission_Date")
+        @XmlSchemaType(name = "date")
+        protected XMLGregorianCalendar submissionDate;
+        @XmlElement(name = "Submission_Comment")
+        protected String submissionComment;
+		public String getSubmissionName() {
+			return submissionName;
+		}
+		public void setSubmissionName(String submissionName) {
+			this.submissionName = submissionName;
+		}
+		public String getSubmissionOrganization() {
+			return submissionOrganization;
+		}
+		public void setSubmissionOrganization(String submissionOrganization) {
+			this.submissionOrganization = submissionOrganization;
+		}
+		public XMLGregorianCalendar getSubmissionDate() {
+			return submissionDate;
+		}
+		public void setSubmissionDate(XMLGregorianCalendar submissionDate) {
+			this.submissionDate = submissionDate;
+		}
+		public String getSubmissionComment() {
+			return submissionComment;
+		}
+		public void setSubmissionComment(String submissionComment) {
+			this.submissionComment = submissionComment;
+		}
 
-        /**
-         * Gets the rest of the content model. 
-         * 
-         * <p>
-         * You are getting this "catch-all" property because of the following reason: 
-         * The field name "SubmissionOrganization" is used by two different parts of a schema. See: 
-         * line 295 of file:/D:/Workspace/beam-example/word-count-beam/target/cwe_schema_latest_mitre.xsd
-         * line 293 of file:/D:/Workspace/beam-example/word-count-beam/target/cwe_schema_latest_mitre.xsd
-         * <p>
-         * To get rid of this property, apply a property customization to one 
-         * of both of the following declarations to change their names: 
-         * Gets the value of the content property.
-         * 
-         * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the content property.
-         * 
-         * <p>
-         * For example, to add a new item, do as follows:
-         * <pre>
-         *    getContent().add(newItem);
-         * </pre>
-         * 
-         * 
-         * <p>
-         * Objects of the following type(s) are allowed in the list
-         * {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
-         * {@link JAXBElement }{@code <}{@link String }{@code >}
-         * {@link JAXBElement }{@code <}{@link String }{@code >}
-         * {@link JAXBElement }{@code <}{@link String }{@code >}
-         * 
-         * 
-         */
-        public List<JAXBElement<?>> getContent() {
-            if (content == null) {
-                content = new ArrayList<JAXBElement<?>>();
-            }
-            return this.content;
-        }
-
+        
     }
 
 }
