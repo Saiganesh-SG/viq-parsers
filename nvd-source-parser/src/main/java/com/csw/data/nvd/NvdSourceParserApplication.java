@@ -26,8 +26,7 @@ public class NvdSourceParserApplication implements CommandLineRunner {
 		logger.info("started the nvd parsing...");
 		// TODO change the below code to fetch the parse type from environment
 		String parseType = "CWE";
-		Boolean isLatest = true;
-		isLatest = (isLatest == null) ? true : isLatest;
+		boolean isLatest = true;
 		if (parseType != null) {
 			nvdSourceParser.run(parseType, isLatest);
 		} else {

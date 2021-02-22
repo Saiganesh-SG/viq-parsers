@@ -17,13 +17,15 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class ParserFileUtils {
+	
+	private ParserFileUtils() {
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(ParserFileUtils.class);
 
 	public static String getDownloadedDirectoryPath(String filePath, List<String> downloadUrls, String type)
 			throws IOException {
 		String path = filePath;
-		// TODO remove this statement as we need to retain the source file in sourcekeep
-		//createOrCleanDirectory(path);
 		if (downloadUrls != null) {
 			for (String urls : downloadUrls) {
 				String zipFilePath = path + "_" + type + "_" + System.currentTimeMillis()

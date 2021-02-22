@@ -62,7 +62,7 @@ public enum TechnologyNameEnumeration {
     ACCELERATOR_IP("Accelerator IP"),
 
     /**
-     * IP that controls/senses the electricals for communication which receives/transmits signals conditioned outside of a system’s digital domain.
+     * IP that controls/senses the electricals for communication which receives/transmits signals conditioned outside of a systems digital domain.
      * 
      */
     @XmlEnumValue("Analog and Mixed Signal IP")

@@ -33,6 +33,9 @@ public class NvdSourceParserImpl implements NvdSourceParser {
 
 	@Value("${sourcekeep.base.path}")
 	private String sourceKeepBasePath;
+	
+	@Value("${data.livekeep.bucketName}")
+	private String s3BucketName;
 
 	@Value("${cwe.path}")
 	private String cwePath;
@@ -53,6 +56,9 @@ public class NvdSourceParserImpl implements NvdSourceParser {
 	@Autowired
     @Qualifier("CpeDataProcessor")
     DataProcessor cpeDataProcessor;
+	
+	@Value("${data.local.flag}")
+	private boolean localFlag;
 
 	/**
 	 * Run.
@@ -69,9 +75,10 @@ public class NvdSourceParserImpl implements NvdSourceParser {
 		}
 		
 		ParseType type = ParseType.forNameIgnoreCase(parseType);
+		
 		//Parse Common Weakness Enumeration from Mitre
 		if (type.name().equalsIgnoreCase(ParseType.CWE.name())) {
-			parseCwe(isLatest);
+			parseWeakness(isLatest);
 		}
 		
 		//Parse Common Platform Enumeration from NVD
@@ -81,27 +88,39 @@ public class NvdSourceParserImpl implements NvdSourceParser {
 	}
 
 	/**
-	 * Parses the cwe.
+	 * Download and parse the weakness.
 	 *
 	 * @param isLatest the is latest
+	 * @param parseType 
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private void parseCwe(Boolean isLatest) throws IOException {
-		String directoryPath = sourceKeepBasePath + cwePath + "/" + ParserConstants.NVD;
+	private void parseWeakness(boolean isLatest) throws IOException {
+		String directoryPath = getSourceDirectory();
 		if (isLatest) {
 			logger.info("Processing newly added and modified CWEs");
-			directoryPath = ParserFileUtils.getDownloadedDirectoryPath(directoryPath, cweDownloadUrls,
-					ParseType.CWE.name());
+			directoryPath = ParserFileUtils.getDownloadedDirectoryPath(directoryPath, cweDownloadUrls, ParseType.CWE.name());
 		}
 		File cweDirectory = new File(directoryPath);
 		if (!cweDirectory.exists()) {
 			logger.error("CWE base directory " + directoryPath + " does not exist");
 		}
-		processsFilesInDirectoryWithSelectedExtension(directoryPath, ParserConstants.XML_FILE_EXTENSION,
-				cweDataProcessor);
+		processsFilesInDirectoryWithSelectedExtension(directoryPath, ParserConstants.XML_FILE_EXTENSION, cweDataProcessor);
 		logger.info("CWE data process completed");
 	}
 	
+	/**
+	 * Creates the source directory. Local directory or s3 path based on the configuration.
+	 *
+	 * @return the source directory
+	 */
+	private String getSourceDirectory() {
+		StringBuilder sourceDirectoryPath = new StringBuilder();
+		sourceDirectoryPath.append(s3BucketName).append(ParserConstants.SLASH).append(ParserConstants.SOURCEKEEP)
+				.append(ParserConstants.SLASH).append(cwePath).append(ParserConstants.SLASH)
+				.append(ParserConstants.MITRE);
+		return sourceDirectoryPath.toString();
+	}
+
 	/**
 	 * Parses the cpe.
 	 *
@@ -138,7 +157,7 @@ public class NvdSourceParserImpl implements NvdSourceParser {
 		}).forEach(path -> process(path, processor));
 	}
 
-	/**
+	/** 
 	 * Process.
 	 *
 	 * @param filePath the file path
@@ -149,7 +168,7 @@ public class NvdSourceParserImpl implements NvdSourceParser {
 			logger.debug("Processing the file - " + filePath);
 			processor.process(filePath);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

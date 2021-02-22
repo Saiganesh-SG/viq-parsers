@@ -14,10 +14,13 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
+
+import com.csw.data.nvd.jaxb.cwe.temp2.Weakness;
 
 
 /**
@@ -95,8 +98,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlRootElement(name = "Weakness_Catalog")
 public class WeaknessCatalog {
 
-    @XmlElement(name = "Weaknesses")
-    protected WeaknessCatalog.Weaknesses weaknesses;
+	/*
+	 * @XmlElement(name = "Weaknesses") protected WeaknessCatalog.Weaknesses
+	 * weaknesses;
+	 */
+    //@XmlElement(name = "Weakness", required = true)
+    //protected List<WeaknessType> weakness;
+    @XmlElementWrapper(name = "Weaknesses")
+    @XmlElement(name = "Weakness")
+    protected List<WeaknessType> weaknesses = new ArrayList<>();
     @XmlElement(name = "Categories")
     protected WeaknessCatalog.Categories categories;
     @XmlElement(name = "Views")
@@ -119,23 +129,59 @@ public class WeaknessCatalog {
      *     {@link WeaknessCatalog.Weaknesses }
      *     
      */
-    public WeaknessCatalog.Weaknesses getWeaknesses() {
-        return weaknesses;
-    }
+	/*
+	 * public WeaknessCatalog.Weaknesses getWeaknesses() { return weaknesses; }
+	 */
+    
+    /**
+     * Gets the value of the weakness property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the weakness property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getWeakness().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link WeaknessType }
+     * 
+     * 
+     */
+	/*
+	 * public List<WeaknessType> getWeakness() { if (weakness == null) { weakness =
+	 * new ArrayList<WeaknessType>(); } return this.weakness; }
+	 */
 
     /**
      * Sets the value of the weaknesses property.
      * 
      * @param value
      *     allowed object is
-     *     {@link WeaknessCatalog.Weaknesses }
+     *     {@link WeaknessCatalog2.Weaknesses }
      *     
      */
-    public void setWeaknesses(WeaknessCatalog.Weaknesses value) {
-        this.weaknesses = value;
-    }
+	/*
+	 * public void setWeaknesses(WeaknessCatalog.Weaknesses value) { this.weaknesses
+	 * = value; }
+	 */
 
-    /**
+    public List<WeaknessType> getWeaknesses() {
+		return weaknesses;
+	}
+
+	public void setWeaknesses(List<WeaknessType> weaknesses) {
+		this.weaknesses = weaknesses;
+	}
+
+	/**
      * Gets the value of the categories property.
      * 
      * @return

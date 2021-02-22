@@ -5,8 +5,17 @@ package com.csw.data.util;
  */
 public final class ParserConstants {
 	
+	/** The Constant SLASH. */
+	public static final String SLASH = "/";
+	
+	/** The Constant SOURCEKEEP. */
+	public static final String SOURCEKEEP = "sourcekeep";
+	
 	/** The Constant NVD. */
 	public static final String NVD = "nvd";
+	
+	/** The Constant MITRE. */
+	public static final String MITRE = "mitre";
 	
 	/** The Constant ZIP_FILE_EXTENSION. */
 	public static final String ZIP_FILE_EXTENSION = ".zip";
