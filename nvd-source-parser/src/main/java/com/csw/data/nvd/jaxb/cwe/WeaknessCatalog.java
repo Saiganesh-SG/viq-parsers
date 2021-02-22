@@ -20,7 +20,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.csw.data.nvd.jaxb.cwe.temp2.Weakness;
 
 
 /**
