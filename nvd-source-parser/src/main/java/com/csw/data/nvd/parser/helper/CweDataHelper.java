@@ -16,6 +16,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,11 +161,12 @@ public class CweDataHelper {
 	 * @param weaknesses the weaknesses
 	 * @param externalReferenceList the external reference list
 	 * @param sourceFilePath the source file path
+	 * @param kafkaMessage 
 	 */
-	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath) {
+	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage) {
 		for (WeaknessType weakness : weaknesses) {
 			WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
-			writeToLiveKeep(cwe, sourceFilePath);
+			writeToLiveKeep(cwe, sourceFilePath, kafkaMessage);
 		}
 	}
 
@@ -173,12 +176,13 @@ public class CweDataHelper {
 	 * @param viewsType the views type
 	 * @param externalReferenceList the external reference list
 	 * @param sourceFilePath the source file path
+	 * @param kafkaMessage 
 	 */
-	public void extractViews(Views viewsType, Map<String, Reference> externalReferenceList, String sourceFilePath) {
+	public void extractViews(Views viewsType, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage) {
 		if(!CollectionUtils.isEmpty(viewsType.getView())) {
 			for(ViewType viewType: viewsType.getView()) {
 				WeaknessRoot view = createView(viewType, externalReferenceList);
-				writeToLiveKeep(view, sourceFilePath);
+				writeToLiveKeep(view, sourceFilePath, kafkaMessage);
 			}
 		}
 	}
@@ -189,12 +193,13 @@ public class CweDataHelper {
 	 * @param categories the categories
 	 * @param externalReferenceList the external reference list
 	 * @param sourceFilePath the source file path
+	 * @param kafkaMessage 
 	 */
-	public void extractCategories(Categories categories, Map<String, Reference> externalReferenceList, String sourceFilePath) {
+	public void extractCategories(Categories categories, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage) {
 		if(!CollectionUtils.isEmpty(categories.getCategory())) {
 			for(CategoryType categoryType: categories.getCategory()) {
 				WeaknessRoot category = createCategory(categoryType, externalReferenceList);
-				writeToLiveKeep(category, sourceFilePath);
+				writeToLiveKeep(category, sourceFilePath, kafkaMessage);
 			}
 		}
 	}
@@ -530,9 +535,11 @@ public class CweDataHelper {
 	 *
 	 * @param weakness the weakness
 	 * @param sourceFilePath the source file path
+	 * @param kafkaMessage 
 	 */
-	private void writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath) {
+	private void writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath, JSONArray kafkaMessages) {
 		ObjectMapper mapper = new ObjectMapper();
+		JSONObject message = new JSONObject();
 		try {
 			//writing the weakness to a local filesystem
 			if(localFlag) {
@@ -540,6 +547,8 @@ public class CweDataHelper {
 				String cweFile = cweLiveKeepDirectory + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
 				mapper.writeValue(new File(cweFile), weakness);
 				generateMetaFile(new File(cweFile), sourceFilePath, cweLiveKeepDirectory);
+				message = createKafkaMessage(weakness.getId(), cweFile, ParserConstants.CWE, "file");
+				kafkaMessages.put(message);
 			}
 			//pushing the file to s3 bucket
 			else {
@@ -547,6 +556,9 @@ public class CweDataHelper {
 				String objectKey = cwePath + "/mitre/" + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
 				PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
 				s3Client.putObject(request, RequestBody.fromBytes(mapper.writeValueAsBytes(weakness)));
+				String s3Uri = liveKeepBasePath + objectKey;
+				message = createKafkaMessage(weakness.getId(), s3Uri, ParserConstants.CWE, "s3");
+				kafkaMessages.put(message);
 			}
 		}
 		catch (Exception e) {
@@ -554,6 +566,23 @@ public class CweDataHelper {
 		}
 	}
 	
+	private JSONObject createKafkaMessage(String weaknessId, String objectKey, String fileType, String systemType) {
+		JSONObject message = new JSONObject();
+		message.put("id", weaknessId);
+		message.put("uri", createFileUri(objectKey, systemType));
+		message.put("fileType", fileType);
+		return message;
+	}
+
+	private Object createFileUri(String objectKey, String systemType) {
+		if("s3".equalsIgnoreCase(systemType)) {
+			return new StringBuilder().append("s3://").append(objectKey).toString();
+		}
+		else {
+			return new StringBuilder().append("file:///").append(objectKey).toString();
+		}
+	}
+
 	/**
 	 * Adds the weakness sources.
 	 *
@@ -785,7 +814,7 @@ public class CweDataHelper {
 	 */
 	private void generateMetaFile(File file, String sourceFilePath, String cweLiveKeepDirectory) {
 		try {
-			String shaChecksum = HashingUtil.getShaChecksum(file);
+			String shaChecksum = "sdsdsd";
 			ObjectMapper mapper = new ObjectMapper();
 			Map<String, Object> map = new HashMap<>();
 			map.put("sha256", shaChecksum);
@@ -795,8 +824,6 @@ public class CweDataHelper {
 			String[] fileNameSplitArray = file.getName().split("\\.");
 			Arrays.deepToString(fileNameSplitArray);
 			mapper.writeValue(Paths.get(cweLiveKeepDirectory + fileNameSplitArray[0] + ".meta.json").toFile(), map);
-		} catch (NoSuchAlgorithmException e) {
-			logger.error(e.getMessage());
 		} catch (IOException e) {
 			logger.error("IOException while reading the Json file");
 		}

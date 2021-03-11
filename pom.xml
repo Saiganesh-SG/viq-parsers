@@ -19,6 +19,7 @@
 
 	<modules>
 		<module>source-parser-util</module>
+		<module>mitre-source-parser</module>
 		<module>nvd-source-parser</module>
 	</modules>
 	

@@ -17,6 +17,9 @@ public final class ParserConstants {
 	/** The Constant MITRE. */
 	public static final String MITRE = "mitre";
 	
+	/** The Constant CWE. */
+	public static final String CWE = "CWE";
+	
 	/** The Constant ZIP_FILE_EXTENSION. */
 	public static final String ZIP_FILE_EXTENSION = ".zip";
     

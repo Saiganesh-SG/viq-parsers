@@ -72,7 +72,7 @@ public class CpeDataProcessorImpl implements DataProcessor {
 
 	private void generateMetaFile(File file, String sourceFilePath, String cpeLiveKeepDirectory) {
 		try {
-			String shaChecksum = HashingUtil.getShaChecksum(file);
+			String shaChecksum = "sdsdsds";
 			ObjectMapper mapper = new ObjectMapper();
 			Map<String, Object> map = new HashMap<>();
 			map.put("sha256", shaChecksum);
@@ -81,8 +81,6 @@ public class CpeDataProcessorImpl implements DataProcessor {
 			map.put("sourceFiles", sourceFileLocation);
 			String baseFileName = FilenameUtils.getBaseName(file.getName());
 			mapper.writeValue(Paths.get(cpeLiveKeepDirectory + baseFileName + ".meta.json").toFile(), map);
-		} catch (NoSuchAlgorithmException e) {
-			logger.error(e.getMessage());
 		} catch (IOException e) {
 			logger.error("IOException while reading the Json file");
 		}

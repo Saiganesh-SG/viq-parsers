@@ -6,10 +6,13 @@ import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.csw.data.nvd.jaxb.cwe.WeaknessCatalog;
@@ -31,6 +34,12 @@ public class CweDataProcessorImpl implements DataProcessor {
 	@Autowired
 	private CweDataHelper cweDataHelper;
 	
+	@Autowired
+	private KafkaTemplate<String, String> kafkaTemplate;
+	
+	@Value("${data.kafka.topic}")
+	private String kafkaTopic;
+	
 	/**
 	 * Process.
 	 *
@@ -42,10 +51,12 @@ public class CweDataProcessorImpl implements DataProcessor {
         Unmarshaller un = context.createUnmarshaller();
         Object obj = un.unmarshal(new File(sourceFilePath));
         WeaknessCatalog weaknessCatalog = (WeaknessCatalog) obj;
+        JSONArray kafkaMessage = new JSONArray();
         Map<String, Reference> externalReferenceList = cweDataHelper.extractExternalReferences(weaknessCatalog.getExternalReferences());
-        cweDataHelper.extractWeakness(weaknessCatalog.getWeaknesses(), externalReferenceList, sourceFilePath);
-        cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList, sourceFilePath);
-        cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList, sourceFilePath);
+        cweDataHelper.extractWeakness(weaknessCatalog.getWeaknesses(), externalReferenceList, sourceFilePath, kafkaMessage);
+        cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList, sourceFilePath, kafkaMessage);
+        cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList, sourceFilePath, kafkaMessage);
+        //TODO publish kafka message
+        kafkaTemplate.send(kafkaTopic, kafkaMessage.toString());
 	}
-	
 }
