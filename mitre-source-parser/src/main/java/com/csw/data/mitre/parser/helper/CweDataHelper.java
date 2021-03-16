@@ -135,13 +135,11 @@ public class CweDataHelper {
 	 */
 	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage) {
 		for (WeaknessType weakness : weaknesses) {
-			if(weakness.getID().intValue() == 99) {
-				WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
-				try {
-					kafkaMessage.put(livekeepService.writeToLiveKeep(cwe, sourceFilePath));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
+			try {
+				kafkaMessage.put(livekeepService.writeToLiveKeep(cwe, sourceFilePath));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
