@@ -60,29 +60,13 @@ import lombok.Setter;
 @Setter
 public class WeaknessRoot {
 
-    /**
-     * The CWE ID attribute
-     * <p>
-     * The required ID attribute provides a unique identifier for the Common Weakness Enumeration
-     * (Required)
-     * 
-     */
     @JsonProperty("id")
     @JsonPropertyDescription("The required ID attribute provides a unique identifier for the Common Weakness Enumeration")
     private String id;
     
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("weaknessType")
+    @JsonProperty("type")
     private String weaknessType;
-    /**
-     * 
-     * (Required)
-     * 
-     */
+
     @JsonProperty("sources")
     private List<Source> sources = new ArrayList<Source>();
     /**

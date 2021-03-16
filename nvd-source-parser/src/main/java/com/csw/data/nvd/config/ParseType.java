@@ -3,7 +3,9 @@ package com.csw.data.nvd.config;
 import com.csw.data.nvd.exception.InvalidParameterException;
 
 public enum ParseType {
-	CVE("cve"), CPE("cpe"), CWE("cwe"), EXPLOIT("exploit"), EXPLOIT_CURATE("exploit_curate");
+	CVE("cve"), CPE("cpe"), COMMENT("comment");
+	
+	private static final String INVALID_PARSE_TYPE = "Invalid parse type. The parse type should be any of the one (CVE, CPE)";
 
 	private final String type;
 
@@ -15,7 +17,7 @@ public enum ParseType {
 		return type;
 	}
 
-	static public Boolean isValidParseType(String name) {
+	public static Boolean isValidParseType(String name) {
 		for (ParseType parseType : ParseType.values()) {
 			if (parseType.name().equalsIgnoreCase(name)) {
 				return true;
@@ -24,12 +26,12 @@ public enum ParseType {
 		return false;
 	}
 
-	static public ParseType forNameIgnoreCase(String name) throws InvalidParameterException {
+	public static ParseType forNameIgnoreCase(String name) throws InvalidParameterException {
 		for (ParseType parseType : ParseType.values()) {
 			if (parseType.name().equalsIgnoreCase(name)) {
 				return parseType;
 			}
 		}
-		throw new InvalidParameterException(ErrorMessage.INVALID_PARSE_TYPE);
+		throw new InvalidParameterException(INVALID_PARSE_TYPE);
 	}
 }

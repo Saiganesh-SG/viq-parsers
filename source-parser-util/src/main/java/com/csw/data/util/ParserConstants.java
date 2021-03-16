@@ -20,6 +20,10 @@ public final class ParserConstants {
 	/** The Constant CWE. */
 	public static final String CWE = "CWE";
 	
+	public static final String CVE = "CVE";
+	
+	public static final String CPE = "CPE";
+	
 	/** The Constant ZIP_FILE_EXTENSION. */
 	public static final String ZIP_FILE_EXTENSION = ".zip";
     

@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.csw.data.mitre.config.ParseType;
 import com.csw.data.mitre.parser.DataProcessor;
 import com.csw.data.mitre.parser.WeaknessParser;
 import com.csw.data.mitre.utils.ParserFileUtils;
@@ -62,7 +61,7 @@ public class WeaknessParserImpl implements WeaknessParser {
 	 */
 	@Override
 	public void extractWeaknessFile() throws Exception {
-		ParserFileUtils.getDownloadedDirectoryPath(sourceKeepBasePath, cweDownloadUrls, ParseType.CWE.name());
+		ParserFileUtils.getDownloadedDirectoryPath(sourceKeepBasePath, cweDownloadUrls, "cpe");
 		List<String> sourceFiles = processsFilesInDirectoryWithExtension(sourceKeepBasePath, ParserConstants.XML_FILE_EXTENSION);
 		cweDataProcessor.process(sourceFiles);
 		LOGGER.info("CWE data process completed");

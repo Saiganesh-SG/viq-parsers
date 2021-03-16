@@ -7,31 +7,30 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.csw.data.nvd.parser.NvdSourceParser;
+import com.csw.data.nvd.parser.NvdTopicParser;
 
 @SpringBootApplication
 public class NvdSourceParserApplication implements CommandLineRunner {
 
-	private static final Logger logger = LoggerFactory.getLogger(NvdSourceParserApplication.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NvdSourceParserApplication.class);
 
 	@Autowired
-	private NvdSourceParser nvdSourceParser;
-
+	private NvdTopicParser nvdTopicParser;
+	
 	public static void main(String[] args) {
 		SpringApplication.run(NvdSourceParserApplication.class, args);
 	}
 
 	@Override
 	public void run(String... args) throws Exception {
-		logger.info("started the nvd parsing...");
-		// TODO change the below code to fetch the parse type from environment
-		String parseType = "CWE";
-		boolean isLatest = true;
+		LOGGER.info("started the nvd parsing...");
+		String parseType = System.getProperty("topic");
+		parseType = "cve";
 		if (parseType != null) {
-			nvdSourceParser.run(parseType, isLatest);
+			nvdTopicParser.run(parseType);
 		} else {
-			logger.error("Arguments are not present. Please pass the required arguments");
+			LOGGER.error("Arguments are not present. Please pass the required arguments");
 		}
+		LOGGER.info("Completed the nvd parsing...");
 	}
-
 }

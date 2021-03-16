@@ -1,12 +1,7 @@
 package com.csw.data.mitre.parser.helper;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,12 +10,10 @@ import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
@@ -58,6 +51,7 @@ import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog.ExternalReferences;
 import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog.Views;
 import com.csw.data.mitre.jaxb.cwe.WeaknessOrdinalitiesType.WeaknessOrdinality;
 import com.csw.data.mitre.jaxb.cwe.WeaknessType;
+import com.csw.data.mitre.parser.LivekeepService;
 import com.csw.data.mitre.pojo.cwe.AlternateTermType;
 import com.csw.data.mitre.pojo.cwe.ApplicablePlatformsRoot;
 import com.csw.data.mitre.pojo.cwe.AudienceType;
@@ -81,16 +75,7 @@ import com.csw.data.mitre.pojo.cwe.WeaknessRoot;
 import com.csw.data.mitre.pojo.cwe.WeaknessRoot.Abstraction;
 import com.csw.data.mitre.pojo.cwe.WeaknessRoot.Status;
 import com.csw.data.mitre.pojo.cwe.WeaknessRoot.Structure;
-import com.csw.data.util.HashingUtil;
 import com.csw.data.util.ParserConstants;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.json.JsonWriteFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 /**
  * The Class CweDataHelper.
@@ -98,32 +83,14 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Component
 public class CweDataHelper {
 	
-	/** The Constant logger. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(CweDataHelper.class);
-	
-	/** The local flag. */
-	@Value("${data.local.flag}")
-	private boolean localFlag;
-
-	/** The live keep base path. */
-	@Value("${livekeep.cwe.mitre.path}")
-	private String liveKeepBasePath;
-
-	/** The cwe path. */
-	@Value("${cwe.path}")
-	private String cwePath;
-	
-	/** The s 3 bucket name. */
-	@Value("${data.livekeep.bucketName}")
-	private String s3BucketName;
-	
 	/** The mitre url prefix. */
 	@Value("${parse.cwe.mitre.url.prefix}")
 	private String mitreUrlPrefix;
 	
-	/** The s 3 client. */
+	/** The livekeep service. */
 	@Autowired
-	private S3Client s3Client;
+	@Qualifier("LivekeepService")
+	private LivekeepService livekeepService;
 	
 	/**
 	 * Extract external references.
@@ -168,8 +135,14 @@ public class CweDataHelper {
 	 */
 	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage) {
 		for (WeaknessType weakness : weaknesses) {
-			WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
-			writeToLiveKeep(cwe, sourceFilePath, kafkaMessage);
+			if(weakness.getID().intValue() == 99) {
+				WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
+				try {
+					kafkaMessage.put(livekeepService.writeToLiveKeep(cwe, sourceFilePath));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -185,7 +158,11 @@ public class CweDataHelper {
 		if(!CollectionUtils.isEmpty(viewsType.getView())) {
 			for(ViewType viewType: viewsType.getView()) {
 				WeaknessRoot view = createView(viewType, externalReferenceList);
-				writeToLiveKeep(view, sourceFilePath, kafkaMessage);
+				try {
+					kafkaMessage.put(livekeepService.writeToLiveKeep(view, sourceFilePath));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -202,7 +179,11 @@ public class CweDataHelper {
 		if(!CollectionUtils.isEmpty(categories.getCategory())) {
 			for(CategoryType categoryType: categories.getCategory()) {
 				WeaknessRoot category = createCategory(categoryType, externalReferenceList);
-				writeToLiveKeep(category, sourceFilePath, kafkaMessage);
+				try {
+					kafkaMessage.put(livekeepService.writeToLiveKeep(category, sourceFilePath));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -246,7 +227,7 @@ public class CweDataHelper {
 			List<com.csw.data.mitre.pojo.cwe.WeaknessOrdinality> weaknessOrdinalities = new ArrayList<>();
 			for (WeaknessOrdinality weaknessOrdinalityType : weaknessType.getWeaknessOrdinalities().getWeaknessOrdinality()) {
 				com.csw.data.mitre.pojo.cwe.WeaknessOrdinality weaknessOrdinality = new com.csw.data.mitre.pojo.cwe.WeaknessOrdinality();
-				weaknessOrdinality.setOrdinality(weaknessOrdinalityType.getOrdinality().value());
+				weaknessOrdinality.setOrdinality("Prim");
 				weaknessOrdinality.setDescription(weaknessOrdinalityType.getDescription());
 				weaknessOrdinalities.add(weaknessOrdinality);
 			}
@@ -535,58 +516,6 @@ public class CweDataHelper {
 	}
 	
 	/**
-	 * Write to live keep.
-	 *
-	 * @param weakness the weakness
-	 * @param sourceFilePath the source file path
-	 * @param kafkaMessage 
-	 */
-	private void writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath, JSONArray kafkaMessages) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(Include.NON_NULL);
-		JSONObject message = new JSONObject();
-		try {
-			//writing the weakness to a local filesystem
-			if(localFlag) {
-				String cweFile = liveKeepBasePath + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
-				mapper.writeValue(new File(cweFile), weakness);
-				generateMetaFile(new File(cweFile), sourceFilePath, liveKeepBasePath);
-				message = createKafkaMessage(weakness.getId(), cweFile, ParserConstants.CWE, "file");
-				kafkaMessages.put(message);
-			}
-			//pushing the file to s3 bucket
-			else {
-				String objectKey = cwePath + "/mitre/" + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
-				PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
-				s3Client.putObject(request, RequestBody.fromBytes(mapper.writeValueAsBytes(weakness)));
-				String s3Uri = liveKeepBasePath + objectKey;
-				message = createKafkaMessage(weakness.getId(), s3Uri, ParserConstants.CWE, "s3");
-				kafkaMessages.put(message);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private JSONObject createKafkaMessage(String weaknessId, String objectKey, String fileType, String systemType) {
-		JSONObject message = new JSONObject();
-		message.put("id", weaknessId);
-		message.put("uri", createFileUri(objectKey, systemType));
-		message.put("fileType", fileType);
-		return message;
-	}
-
-	private Object createFileUri(String objectKey, String systemType) {
-		if("s3".equalsIgnoreCase(systemType)) {
-			return new StringBuilder().append("s3://").append(objectKey).toString();
-		}
-		else {
-			return new StringBuilder().append("file:///").append(objectKey).toString();
-		}
-	}
-
-	/**
 	 * Adds the weakness sources.
 	 *
 	 * @param weaknessId the weakness id
@@ -783,7 +712,7 @@ public class CweDataHelper {
 	private String addStructuredTypes1(List<Object> contents) {
 		StringBuilder sb = new StringBuilder();
 		String openTag = "<";
-		String openTagSlash = "</";
+		String openTagSlash = "</";	
 		String closeTag = ">";
 		
 		for (Object content : contents) {
@@ -800,16 +729,6 @@ public class CweDataHelper {
 			if(null == element.getNextSibling()) {
 				continue;
 			}
-			
-			
-			
-			System.out.println(element.getNodeName());//tag
-			System.out.println(element.getTextContent());//value
-			
-			org.w3c.dom.Node node = element.getFirstChild();
-			System.out.println(node.getNodeValue());
-			System.out.println(node.getTextContent());
-			System.out.println(node.getTextContent());
 		}
 		return null;
 	}
@@ -842,30 +761,6 @@ public class CweDataHelper {
 		return technicalImpacts;
 	}
 
-	/**
-	 * Generate meta file.
-	 *
-	 * @param file the file
-	 * @param sourceFilePath the source file path
-	 * @param cweLiveKeepDirectory the cwe live keep directory
-	 */
-	private void generateMetaFile(File file, String sourceFilePath, String cweLiveKeepDirectory) {
-		try {
-			String shaChecksum = HashingUtil.getShaChecksum(Files.readAllBytes(file.toPath()));
-			ObjectMapper mapper = new ObjectMapper();
-			Map<String, Object> map = new HashMap<>();
-			map.put("sha256", shaChecksum);
-			List<String> sourceFileLocation = new ArrayList<>();
-			sourceFileLocation.add(sourceFilePath);
-			map.put("sourceFiles", sourceFileLocation);
-			String[] fileNameSplitArray = file.getName().split("\\.");
-			Arrays.deepToString(fileNameSplitArray);
-			mapper.writeValue(Paths.get(cweLiveKeepDirectory + fileNameSplitArray[0] + ".meta.json").toFile(), map);
-		} catch (IOException e) {
-			LOGGER.error("IOException while proccesing the Json file");
-		}
-	}
-	
 	/**
 	 * Xml gregorian calendar to date.
 	 *
