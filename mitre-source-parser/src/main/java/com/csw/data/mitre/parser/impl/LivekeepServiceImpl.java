@@ -139,7 +139,7 @@ public class LivekeepServiceImpl implements LivekeepService {
 			return new StringBuilder().append("s3:/").append(objectKey).toString();
 		}
 		else {
-			return new StringBuilder().append("file://").append(objectKey).toString();
+			return new StringBuilder().append("file:///").append(objectKey).toString();
 		}
 	}
 
