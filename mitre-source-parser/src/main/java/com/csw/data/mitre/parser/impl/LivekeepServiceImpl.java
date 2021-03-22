@@ -66,24 +66,10 @@ public class LivekeepServiceImpl implements LivekeepService {
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		String cweFile = liveKeepBasePath + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
 		File weaknessFile = new File(cweFile);
-		
-			//livekeep file is written
-			mapper.writeValue(weaknessFile, weakness);
-			
-			//json schema validation here with justify
-			JsonValidationService service = JsonValidationService.newInstance();
-			JsonSchema schema = service.readSchema(Paths.get("src/main/resources/schema/cwe_schema.json"));
-			ProblemHandler handler = service.createProblemPrinter(System.out::println);
-			Path jsonSubject = weaknessFile.toPath();
-			
-			// Parses the JSON instance by JsonParser
-			try (JsonParser parser = service.createParser(jsonSubject, schema, handler)) {
-			    while (parser.hasNext()) {
-			        JsonParser.Event event = parser.next();
-			        // Do something useful here
-			    }
-			}
-		
+
+		// livekeep file is written
+		mapper.writeValue(weaknessFile, weakness);
+
 		return writeJsonAndMessage(cweFile, weakness.getId(), sourceFilePath);
 	}
 	
