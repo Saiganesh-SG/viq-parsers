@@ -12,6 +12,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +54,7 @@ import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog.Views;
 import com.csw.data.mitre.jaxb.cwe.WeaknessOrdinalitiesType.WeaknessOrdinality;
 import com.csw.data.mitre.jaxb.cwe.WeaknessType;
 import com.csw.data.mitre.parser.LivekeepService;
+import com.csw.data.mitre.parser.impl.WeaknessParserImpl;
 import com.csw.data.mitre.pojo.cwe.AlternateTermType;
 import com.csw.data.mitre.pojo.cwe.ApplicablePlatformsRoot;
 import com.csw.data.mitre.pojo.cwe.AudienceType;
@@ -82,6 +85,9 @@ import com.csw.data.util.ParserConstants;
  */
 @Component
 public class CweDataHelper {
+	
+	/** The Constant LOGGER. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(CweDataHelper.class);
 	
 	/** The mitre url prefix. */
 	@Value("${parse.cwe.mitre.url.prefix}")
@@ -195,7 +201,6 @@ public class CweDataHelper {
 	 */
 	private WeaknessRoot createCwe(WeaknessType weaknessType, Map<String, Reference> externalReferenceList) {
 		com.csw.data.mitre.pojo.cwe.WeaknessRoot weakness = new com.csw.data.mitre.pojo.cwe.WeaknessRoot();
-		
 		weakness.setId("CWE-" + weaknessType.getID());
 		weakness.setWeaknessType("Weakness");
 		weakness.setSources(addWeaknessSources(String.valueOf(weaknessType.getID()), ParserConstants.MITRE));
@@ -358,7 +363,8 @@ public class CweDataHelper {
 		if(null != weaknessType.getFunctionalAreas()) {
 			List<String> functionalAreas = new ArrayList<>();
 			for(FunctionalAreaEnumeration functionalAreaEnumeration: weaknessType.getFunctionalAreas().getFunctionalArea()) {
-				functionalAreas.add(functionalAreaEnumeration.value());
+				if(null != functionalAreaEnumeration)
+					functionalAreas.add(functionalAreaEnumeration.value());
 			}
 			weakness.setFunctionalAreas(functionalAreas);
 		}
