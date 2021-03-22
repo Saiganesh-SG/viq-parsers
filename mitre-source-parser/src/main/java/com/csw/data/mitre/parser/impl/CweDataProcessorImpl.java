@@ -61,6 +61,7 @@ public class CweDataProcessorImpl implements DataProcessor {
 	        cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList, sourceFilePath, kafkaMessage);
 	        cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList, sourceFilePath, kafkaMessage);
 	        kafkaTemplate.send(kafkaTopic, kafkaMessage.toString());
+	        
 		}
 	}
 
