@@ -401,7 +401,9 @@ public class CweDataHelper {
 			weakness.setNotes(notes);
 		}
 		weakness.setReferences(addReferences(weaknessType.getReferences(), externalReferenceList));
-		weakness.setContentHistory(addContentHistory(weaknessType.getContentHistory()));		
+		if(null != weaknessType.getContentHistory()) {
+			weakness.setContentHistory(addContentHistory(weaknessType.getContentHistory()));
+		}
 		return weakness;
 	}
 	
