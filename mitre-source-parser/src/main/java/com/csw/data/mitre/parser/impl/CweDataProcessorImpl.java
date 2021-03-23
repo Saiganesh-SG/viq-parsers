@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog;
 import com.csw.data.mitre.parser.DataProcessor;
@@ -60,7 +63,21 @@ public class CweDataProcessorImpl implements DataProcessor {
 	        cweDataHelper.extractWeakness(weaknessCatalog.getWeaknesses(), externalReferenceList, sourceFilePath, kafkaMessage);
 	        cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList, sourceFilePath, kafkaMessage);
 	        cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList, sourceFilePath, kafkaMessage);
-	        kafkaTemplate.send(kafkaTopic, kafkaMessage.toString());
+			ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(kafkaTopic, kafkaMessage.toString());
+
+			future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+
+				@Override
+				public void onSuccess(SendResult<String, String> result) {
+					LOGGER.info("Sent message with offset = {} to topic = {}", result.getRecordMetadata().offset(), result.getRecordMetadata().topic());
+				}
+
+				@Override
+				public void onFailure(Throwable ex) {
+					LOGGER.info("Unable to send message due to : {}", ex.getMessage());
+					LOGGER.error("Unable to send message due to: {}", ex.getMessage(), ex);
+				}
+			});
 	        
 		}
 	}
