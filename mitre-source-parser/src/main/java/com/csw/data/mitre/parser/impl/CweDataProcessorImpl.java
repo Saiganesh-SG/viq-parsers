@@ -69,11 +69,13 @@ public class CweDataProcessorImpl implements DataProcessor {
 
 				@Override
 				public void onSuccess(SendResult<String, String> result) {
+					System.out.println("Sent message with offset=[" + result.getRecordMetadata().offset() + "] to topic = " + result.getRecordMetadata().topic());
 					LOGGER.info("Sent message with offset = {} to topic = {}", result.getRecordMetadata().offset(), result.getRecordMetadata().topic());
 				}
 
 				@Override
 				public void onFailure(Throwable ex) {
+					System.out.println("Unable to send message due to : {}"+ ex.getMessage());
 					LOGGER.info("Unable to send message due to : {}", ex.getMessage());
 					LOGGER.error("Unable to send message due to: {}", ex.getMessage(), ex);
 				}
