@@ -15,15 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog;
 import com.csw.data.mitre.parser.DataProcessor;
 import com.csw.data.mitre.parser.helper.CweDataHelper;
 import com.csw.data.mitre.pojo.cwe.Reference;
+import com.csw.data.mitre.pojo.cwe.WeaknessMetaData;
 
 /**
  * The Class CweDataProcessorImpl.
@@ -58,21 +56,18 @@ public class CweDataProcessorImpl implements DataProcessor {
 			WeaknessCatalog weaknessCatalog = unmarshalWeaknessCatalog(sourceFilePath);
 			
 	        JSONArray kafkaMessage = new JSONArray();
-	        
+	        Map<String, WeaknessMetaData> weaknessMetaDataList = cweDataHelper.extractWeaknessMetaData(weaknessCatalog);
 	        Map<String, Reference> externalReferenceList = cweDataHelper.extractExternalReferences(weaknessCatalog.getExternalReferences());
-	        cweDataHelper.extractWeakness(weaknessCatalog.getWeaknesses(), externalReferenceList, sourceFilePath, kafkaMessage);
+	        
+	        cweDataHelper.extractWeakness(weaknessCatalog.getWeaknesses(), externalReferenceList, sourceFilePath, kafkaMessage, weaknessMetaDataList);
 	        cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList, sourceFilePath, kafkaMessage);
 	        cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList, sourceFilePath, kafkaMessage);
-	        LOGGER.info("Sending the message to kafka topic : {}", kafkaTopic);
-	        LOGGER.info("Kafka message length : {}", kafkaMessage.length());
 			try {
 				kafkaTemplate.send(kafkaTopic, kafkaMessage.toString()).get();
 			} catch (Exception e) {
 				LOGGER.info("Error while sending the message");
 				e.printStackTrace();
 			}
-			
-			LOGGER.info("running the kafka callback");
 		}
 	}
 

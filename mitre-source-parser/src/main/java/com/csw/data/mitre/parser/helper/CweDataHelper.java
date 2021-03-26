@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +49,13 @@ import com.csw.data.mitre.jaxb.cwe.ScopeEnumeration;
 import com.csw.data.mitre.jaxb.cwe.StructuredTextType;
 import com.csw.data.mitre.jaxb.cwe.TechnicalImpactEnumeration;
 import com.csw.data.mitre.jaxb.cwe.ViewType;
+import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog;
 import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog.Categories;
 import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog.ExternalReferences;
 import com.csw.data.mitre.jaxb.cwe.WeaknessCatalog.Views;
 import com.csw.data.mitre.jaxb.cwe.WeaknessOrdinalitiesType.WeaknessOrdinality;
 import com.csw.data.mitre.jaxb.cwe.WeaknessType;
 import com.csw.data.mitre.parser.LivekeepService;
-import com.csw.data.mitre.parser.impl.WeaknessParserImpl;
 import com.csw.data.mitre.pojo.cwe.AlternateTermType;
 import com.csw.data.mitre.pojo.cwe.ApplicablePlatformsRoot;
 import com.csw.data.mitre.pojo.cwe.AudienceType;
@@ -74,6 +75,7 @@ import com.csw.data.mitre.pojo.cwe.Relationship;
 import com.csw.data.mitre.pojo.cwe.Source;
 import com.csw.data.mitre.pojo.cwe.SubmissionRoot;
 import com.csw.data.mitre.pojo.cwe.TaxonomyMapping;
+import com.csw.data.mitre.pojo.cwe.WeaknessMetaData;
 import com.csw.data.mitre.pojo.cwe.WeaknessRoot;
 import com.csw.data.mitre.pojo.cwe.WeaknessRoot.Abstraction;
 import com.csw.data.mitre.pojo.cwe.WeaknessRoot.Status;
@@ -138,10 +140,11 @@ public class CweDataHelper {
 	 * @param externalReferenceList the external reference list
 	 * @param sourceFilePath the source file path
 	 * @param kafkaMessage 
+	 * @param weaknessMetaDataList 
 	 */
-	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage) {
+	public void extractWeakness(List<WeaknessType> weaknesses, Map<String, Reference> externalReferenceList, String sourceFilePath, JSONArray kafkaMessage, Map<String, WeaknessMetaData> weaknessMetaDataList) {
 		for (WeaknessType weakness : weaknesses) {
-			WeaknessRoot cwe = createCwe(weakness, externalReferenceList);
+			WeaknessRoot cwe = createCwe(weakness, externalReferenceList, weaknessMetaDataList);
 			try {
 				kafkaMessage.put(livekeepService.writeToLiveKeep(cwe, sourceFilePath));
 			} catch (Exception e) {
@@ -197,13 +200,15 @@ public class CweDataHelper {
 	 *
 	 * @param weaknessType the weakness type
 	 * @param externalReferenceList the external reference list
+	 * @param weaknessMetaDataList 
 	 * @return the weakness root
 	 */
-	private WeaknessRoot createCwe(WeaknessType weaknessType, Map<String, Reference> externalReferenceList) {
+	private WeaknessRoot createCwe(WeaknessType weaknessType, Map<String, Reference> externalReferenceList, Map<String, WeaknessMetaData> weaknessMetaDataList) {
 		com.csw.data.mitre.pojo.cwe.WeaknessRoot weakness = new com.csw.data.mitre.pojo.cwe.WeaknessRoot();
-		weakness.setId("CWE-" + weaknessType.getID());
+		String id = String.valueOf(weaknessType.getID());
+		weakness.setId("CWE-" + id);
 		weakness.setWeaknessType("Weakness");
-		weakness.setSources(addWeaknessSources(String.valueOf(weaknessType.getID()), ParserConstants.MITRE));
+		weakness.setSources(addWeaknessSources(id, ParserConstants.MITRE));
 		weakness.setTitle(weaknessType.getName());
 		weakness.setAbstraction(Abstraction.fromValue(weaknessType.getAbstraction().value()));
 		weakness.setStatus(Status.fromValue(weaknessType.getStatus().value()));
@@ -216,11 +221,16 @@ public class CweDataHelper {
 			List<com.csw.data.mitre.pojo.cwe.RelatedWeakness> relatedWeaknesses = new ArrayList<>();
 			for (RelatedWeakness relatedWeaknessType : weaknessType.getRelatedWeaknesses().getRelatedWeakness()) {
 				com.csw.data.mitre.pojo.cwe.RelatedWeakness relatedWeakness = new com.csw.data.mitre.pojo.cwe.RelatedWeakness();
-				relatedWeakness.setId(String.valueOf(relatedWeaknessType.getCWEID()));
+				WeaknessMetaData metaData = weaknessMetaDataList.get(String.valueOf(relatedWeaknessType.getCWEID()));
+				relatedWeakness.setId(null != relatedWeaknessType.getCWEID() ? "CWE-" + relatedWeaknessType.getCWEID() : null );
 				relatedWeakness.setNature(null != relatedWeaknessType.getNature() ? relatedWeaknessType.getNature().value() : null);
 				relatedWeakness.setChainId(String.valueOf(relatedWeaknessType.getChainID()));
-				relatedWeakness.setViewId(String.valueOf(relatedWeaknessType.getViewID()));
+				relatedWeakness.setViewId(null != relatedWeaknessType.getViewID() ?  "CWE-" + relatedWeaknessType.getViewID() : null );
 				relatedWeakness.setOrdinal(null != relatedWeaknessType.getOrdinal() ? relatedWeaknessType.getOrdinal().value() : null);
+				if (null != metaData) {
+					relatedWeakness.setTitle(metaData.getTitle());
+					relatedWeakness.setType(metaData.getType());
+				}
 				relatedWeaknesses.add(relatedWeakness);
 			}
 			weakness.setRelatedWeaknesses(relatedWeaknesses);
@@ -230,7 +240,7 @@ public class CweDataHelper {
 			List<com.csw.data.mitre.pojo.cwe.WeaknessOrdinality> weaknessOrdinalities = new ArrayList<>();
 			for (WeaknessOrdinality weaknessOrdinalityType : weaknessType.getWeaknessOrdinalities().getWeaknessOrdinality()) {
 				com.csw.data.mitre.pojo.cwe.WeaknessOrdinality weaknessOrdinality = new com.csw.data.mitre.pojo.cwe.WeaknessOrdinality();
-				weaknessOrdinality.setOrdinality("Prim");
+				weaknessOrdinality.setOrdinality(weaknessOrdinalityType.getOrdinality().value());
 				weaknessOrdinality.setDescription(weaknessOrdinalityType.getDescription());
 				weaknessOrdinalities.add(weaknessOrdinality);
 			}
@@ -402,11 +412,22 @@ public class CweDataHelper {
 		}
 		weakness.setReferences(addReferences(weaknessType.getReferences(), externalReferenceList));
 		if(null != weaknessType.getContentHistory()) {
-			weakness.setContentHistory(addContentHistory(weaknessType.getContentHistory()));
+			ContentHistoryRoot contentHistory = addContentHistory(weaknessType.getContentHistory(), weakness);
+			//setWeaknessDates(weakness, weaknessType.getContentHistory());
+			weakness.setContentHistory(contentHistory);
 		}
 		return weakness;
 	}
 	
+	private void setWeaknessDates(WeaknessRoot weakness, ContentHistoryType contentHistoryType) {
+		Submission submission = contentHistoryType.getSubmission();
+		SimpleDateFormat dateFormat = new SimpleDateFormat(ParserConstants.DEFAULT_DATE_FORMAT);
+		if(null != submission) {
+			Date submissionDate = xmlGregorianCalendarToDate(submission.getSubmissionDate());
+			weakness.setSubmissionDate(dateFormat.format(submissionDate));
+		}
+	}
+
 	/**
 	 * Creates the view.
 	 *
@@ -460,7 +481,7 @@ public class CweDataHelper {
 			weakness.setNotes(notes);
 		}
 		weakness.setReferences(addReferences(viewType.getReferences(), externalReferenceList));
-		weakness.setContentHistory(addContentHistory(viewType.getContentHistory()));
+		weakness.setContentHistory(addContentHistory(viewType.getContentHistory(), weakness));
 		return weakness;
 	}
 	
@@ -517,7 +538,7 @@ public class CweDataHelper {
 			weakness.setNotes(notes);
 		}
 		weakness.setReferences(addReferences(categoryType.getReferences(), externalReferenceList));
-		weakness.setContentHistory(addContentHistory(categoryType.getContentHistory()));
+		weakness.setContentHistory(addContentHistory(categoryType.getContentHistory(), weakness));
 		return weakness;
 	}
 	
@@ -562,12 +583,13 @@ public class CweDataHelper {
 	 * Adds the content history.
 	 *
 	 * @param contentHistoryType the content history type
+	 * @param weakness 
 	 * @return the content history root
 	 */
-	private ContentHistoryRoot addContentHistory(ContentHistoryType contentHistoryType) {
+	private ContentHistoryRoot addContentHistory(ContentHistoryType contentHistoryType, WeaknessRoot weakness) {
 		ContentHistoryRoot contentHistory = new ContentHistoryRoot();
-		contentHistory.setSubmission(addContentHistorySubmission(contentHistoryType.getSubmission()));
-		contentHistory.setModification(addContentHistoryModification(contentHistoryType.getModification()));
+		contentHistory.setSubmission(addContentHistorySubmission(contentHistoryType.getSubmission(), weakness));
+		contentHistory.setModification(addContentHistoryModification(contentHistoryType.getModification(), weakness));
 		contentHistory.setContribution(addContentHistoryContribution(contentHistoryType.getContribution()));
 		contentHistory.setPreviousEntryName(addContentHistoryPreviousEntryDetails(contentHistoryType.getPreviousEntryName()));
 		return contentHistory;
@@ -626,9 +648,10 @@ public class CweDataHelper {
 	 * Adds the content history modification.
 	 *
 	 * @param modifications the modifications
+	 * @param weakness 
 	 * @return the list
 	 */
-	private List<ModificationType> addContentHistoryModification(List<Modification> modifications) {
+	private List<ModificationType> addContentHistoryModification(List<Modification> modifications, WeaknessRoot weakness) {
 		List<ModificationType> modificationTypes = new ArrayList<>();
 		if(CollectionUtils.isEmpty(modifications)) {
 			return modificationTypes;
@@ -643,6 +666,7 @@ public class CweDataHelper {
 			modificationType.setModificationDate(dateFormat.format(modificationDate));
 			modificationType.setModificationImportance(null != modification.getModificationImportance() ? modification.getModificationImportance().value() : null);
 			modificationType.setModificationComment(modification.getModificationComment());
+			weakness.setLastUpdatedDate(dateFormat.format(modificationDate));
 			modificationTypes.add(modificationType);
 		}
 		return modificationTypes;
@@ -652,9 +676,10 @@ public class CweDataHelper {
 	 * Adds the content history submission.
 	 *
 	 * @param submission the submission
+	 * @param weakness 
 	 * @return the submission root
 	 */
-	private SubmissionRoot addContentHistorySubmission(Submission submission) {
+	private SubmissionRoot addContentHistorySubmission(Submission submission, WeaknessRoot weakness) {
 		if(null == submission) {
 			return null;
 		}
@@ -666,6 +691,7 @@ public class CweDataHelper {
 		submissionRoot.setSubmissionOrganization(submission.getSubmissionOrganization());
 		submissionRoot.setSubmissionDate(dateFormat.format(submissionDate));
 		submissionRoot.setSubmissionComment(submission.getSubmissionComment());
+		weakness.setSubmissionDate(dateFormat.format(submissionDate));
 		return submissionRoot;
 	}
 
@@ -780,4 +806,51 @@ public class CweDataHelper {
 		return urlDate.toGregorianCalendar().getTime();
 	}
 
+	public Map<String, WeaknessMetaData> extractWeaknessMetaData(WeaknessCatalog weaknessCatalog) {
+		Map<String, WeaknessMetaData> metaDataList = new HashMap<>();
+		metaDataList.putAll(extractMetadataFromWeakness(weaknessCatalog.getWeaknesses()));
+		metaDataList.putAll(extractMetadataFromCategories(weaknessCatalog.getCategories()));
+		metaDataList.putAll(extractMetadataFromViews(weaknessCatalog.getViews()));
+		LOGGER.info("metaDataList size : {}", metaDataList.size());
+		return metaDataList;
+	}
+	
+	private Map<String, WeaknessMetaData> extractMetadataFromWeakness(List<WeaknessType> weaknesses) {
+		Map<String, WeaknessMetaData> metaDataList = new HashMap<>();
+		for (WeaknessType weaknessType : weaknesses) {
+			WeaknessMetaData metaData = createMetaData(String.valueOf(weaknessType.getID()), weaknessType.getName(), "Weakness");
+			metaDataList.put(String.valueOf(weaknessType.getID()), metaData);
+		}
+		return metaDataList;
+	}
+	
+	private Map<String, WeaknessMetaData> extractMetadataFromCategories(Categories categories) {
+		Map<String, WeaknessMetaData> metaDataList = new HashMap<>();
+		if(!CollectionUtils.isEmpty(categories.getCategory())) {
+			for (CategoryType category : categories.getCategory()) {
+				WeaknessMetaData metaData = createMetaData(String.valueOf(category.getID()), category.getName(), "Category");
+				metaDataList.put(String.valueOf(category.getID()), metaData);
+			}
+		}
+		return metaDataList;
+	}
+
+	private Map<String, WeaknessMetaData> extractMetadataFromViews(Views views) {
+		Map<String, WeaknessMetaData> metaDataList = new HashMap<>();
+		if(!CollectionUtils.isEmpty(views.getView())) {
+			for (ViewType view : views.getView()) {
+				WeaknessMetaData metaData = createMetaData(String.valueOf(view.getID()), view.getName(), "Category");
+				metaDataList.put(String.valueOf(view.getID()), metaData);
+			}
+		}
+		return metaDataList;
+	}
+	
+	private WeaknessMetaData createMetaData(String id, String title, String type) {
+		WeaknessMetaData data = new WeaknessMetaData();
+		data.setId(id);
+		data.setTitle(title);
+		data.setType(type);
+		return data;
+	}
 }

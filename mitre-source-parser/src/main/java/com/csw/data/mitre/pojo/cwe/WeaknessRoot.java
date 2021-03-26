@@ -155,6 +155,8 @@ public class WeaknessRoot {
     private List<Reference> references = new ArrayList<>();
     @JsonProperty("contentHistory")
     private ContentHistoryRoot contentHistory;
+    private String lastUpdatedDate;
+    private String submissionDate;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
