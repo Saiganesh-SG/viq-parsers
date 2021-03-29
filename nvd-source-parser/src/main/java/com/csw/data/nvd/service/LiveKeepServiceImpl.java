@@ -60,7 +60,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 			
 			//livekeep file is written
 			mapper.writeValue(targetFile, vulnerability);
-			writeJsonAndMessage(targetFilePath, vulnerability.getId(), vulnerability, cveLocalDirectory);
+			kafkaMessage.put(writeJsonAndMessage(targetFilePath, vulnerability.getId(), vulnerability, cveLocalDirectory));
 		}
 		return kafkaMessage;
 	}

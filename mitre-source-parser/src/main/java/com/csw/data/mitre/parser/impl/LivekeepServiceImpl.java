@@ -2,9 +2,7 @@ package com.csw.data.mitre.parser.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,10 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
-import org.leadpony.justify.api.JsonSchema;
-import org.leadpony.justify.api.JsonValidationService;
-import org.leadpony.justify.api.ProblemHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +26,17 @@ import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.json.stream.JsonParser;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+/**
+ * The Class LivekeepServiceImpl.
+ */
 @Service
 @Qualifier("LivekeepService")
 public class LivekeepServiceImpl implements LivekeepService {
 	
+	/** The Constant LOGGER. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LivekeepServiceImpl.class);
 	
 	/** The local flag. */
@@ -60,6 +59,14 @@ public class LivekeepServiceImpl implements LivekeepService {
 	@Autowired
 	private S3Client s3Client;
 
+	/**
+	 * Write to live keep.
+	 *
+	 * @param weakness the weakness
+	 * @param sourceFilePath the source file path
+	 * @return the JSON object
+	 * @throws Exception the exception
+	 */
 	@Override
 	public JSONObject writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
@@ -73,6 +80,14 @@ public class LivekeepServiceImpl implements LivekeepService {
 		return writeJsonAndMessage(cweFile, weakness.getId(), sourceFilePath);
 	}
 	
+	/**
+	 * Write json and message.
+	 *
+	 * @param cweFile the cwe file
+	 * @param weaknessId the weakness id
+	 * @param sourceFilePath the source file path
+	 * @return the JSON object
+	 */
 	private JSONObject writeJsonAndMessage(String cweFile, String weaknessId, String sourceFilePath) {
 		String fileSystemType = localFlag ? "file" : "s3";
 		//write file to s3
@@ -112,14 +127,34 @@ public class LivekeepServiceImpl implements LivekeepService {
 		}
 	}
 
+	/**
+	 * Creates the kafka message.
+	 *
+	 * @param weaknessId the weakness id
+	 * @param objectKey the object key
+	 * @param fileType the file type
+	 * @param systemType the system type
+	 * @return the JSON object
+	 */
 	private JSONObject createKafkaMessage(String weaknessId, String objectKey, String fileType, String systemType) {
 		JSONObject message = new JSONObject();
-		message.put("id", weaknessId);
-		message.put("uri", createFileUri(objectKey, systemType));
-		message.put("fileType", fileType);
+		try {
+			message.put("id", weaknessId);
+			message.put("uri", createFileUri(objectKey, systemType));
+			message.put("fileType", fileType);
+		} catch (JSONException e) {
+			LOGGER.error("JSON Exception while creating kafka message : {}", e.getMessage());
+		}
 		return message;
 	}
 
+	/**
+	 * Creates the file uri.
+	 *
+	 * @param objectKey the object key
+	 * @param systemType the system type
+	 * @return the object
+	 */
 	private Object createFileUri(String objectKey, String systemType) {
 		if("s3".equalsIgnoreCase(systemType)) {
 			return new StringBuilder().append("s3:/").append(objectKey).toString();
