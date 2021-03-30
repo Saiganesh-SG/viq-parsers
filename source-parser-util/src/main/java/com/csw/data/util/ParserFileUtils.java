@@ -26,6 +26,7 @@ public class ParserFileUtils {
 		String path = filePath;
 		if (downloadUrls != null) {
 			for (String urls : downloadUrls) {
+				LOGGER.info("cve source url :: {}", urls);
 				String zipFilePath = path + "_" + type + "_" + System.currentTimeMillis()
 						+ ParserConstants.ZIP_FILE_EXTENSION;
 				URL url = new URL(urls);

@@ -2,7 +2,6 @@ package com.csw.data.nvd.parser.helper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.text.DateFormat;
@@ -21,7 +20,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.CharSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,6 +36,7 @@ import com.csw.data.nvd.json.source.LangString;
 import com.csw.data.nvd.json.source.NvdCveFeedJson11;
 import com.csw.data.nvd.json.source.ProblemtypeDatum;
 import com.csw.data.nvd.json.target.AffectedSoftwareConfiguration;
+import com.csw.data.nvd.json.target.AffectedSoftwareConfigurationType;
 import com.csw.data.nvd.json.target.Cvssv2;
 import com.csw.data.nvd.json.target.Cvssv3;
 import com.csw.data.nvd.json.target.CweList;
@@ -73,8 +72,6 @@ public class CveConstructor {
 	private Vulnerability constructVulnerabilityJson(DefCveItem cveItem, Map<String, List<VendorComment>> vendorComments) {
 		Vulnerability vulnerability = new Vulnerability();
 		CVEJSON40Min11 cve = cveItem.getCve();
-		LOGGER.debug("CVE under process: {}", cve.getCVEDataMeta().getId());
-		System.out.println("CVE under process: " + cve.getCVEDataMeta().getId());
 		vulnerability.setId(cve.getCVEDataMeta().getId());
 		vulnerability.setDescription(cve.getDescription().getDescriptionData().get(0).getValue());
 		vulnerability.setAssigner(cve.getCVEDataMeta().getAssigner());
@@ -125,6 +122,9 @@ public class CveConstructor {
 		for (ProblemtypeDatum problemtypeDatum : problemtypeDatums) {
 			List<LangString> langStrings = problemtypeDatum.getDescription();
 			for (LangString langString : langStrings) {
+				if(null == langString.getValue() || !langString.getValue().startsWith("CWE-")) {
+					continue;
+				}
 				CweList cweList = new CweList();
 				cweList.setId(langString.getValue());
 				cweLists.add(cweList);
@@ -148,7 +148,10 @@ public class CveConstructor {
 				}
 			}
 		}
-		vulnerability.setAffectedSoftwareConfigurations(affectedSoftwareConfigurations);
+		AffectedSoftwareConfigurationType affectedSoftwareConfigurationType = new AffectedSoftwareConfigurationType();
+		affectedSoftwareConfigurationType.setAffectedProductCount(String.valueOf(affectedSoftwareConfigurations.size()));
+		affectedSoftwareConfigurationType.setSoftwareConfigurations(affectedSoftwareConfigurations);
+		vulnerability.setAffectedSoftwareConfigurations(affectedSoftwareConfigurationType);
 		return vulnerability;
 	}
 
@@ -161,6 +164,8 @@ public class CveConstructor {
 				configuration.setRunningOnOrWith(String.valueOf(!defCpeMatch.getVulnerable()));
 				configuration.setCpe23Uri(defCpeMatch.getCpe23Uri());
 				configuration.setTitle(defCpeMatch.getCpe23Uri());
+				configuration.setVendor(getVendorFromUri(defCpeMatch.getCpe23Uri()));
+				configuration.setProduct(getProductFromUri(defCpeMatch.getCpe23Uri()));
 				configuration.setSoftwareConfigurationGroup("Configuration " + configurationNumber);
 				configuration.setVersionStart(null != defCpeMatch.getVersionStartIncluding() ? defCpeMatch.getVersionStartIncluding() : defCpeMatch.getVersionStartExcluding());
 				configuration.setVersionStartIncluding(defCpeMatch.getVersionStartIncluding());
@@ -171,6 +176,16 @@ public class CveConstructor {
 				affectedSoftwareConfigurations.add(configuration);
 			}
 		return affectedSoftwareConfigurations;
+	}
+
+	private String getProductFromUri(String cpe23Uri) {
+		String[] tokens = cpe23Uri.split(":");
+		return tokens[4].replace("_", " ");
+	}
+	
+	private String getVendorFromUri(String cpe23Uri) {
+		String[] tokens = cpe23Uri.split(":");
+		return tokens[3].replace("_", " ");
 	}
 
 	private List<VendorComment> extractVendorCommentByCve(Map<String, List<VendorComment>> vendorComments, String cveId) {

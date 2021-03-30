@@ -50,6 +50,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 
 	@Override
 	public JSONArray writeFileToLiveKeep(List<Vulnerability> vulnerabilities, String cveLocalDirectory) throws IOException {
+		LOGGER.info("writeFileToLiveKeep - start - vulnerabilities size : {}", vulnerabilities.size());
 		JSONArray kafkaMessage = new JSONArray();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
@@ -62,6 +63,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 			mapper.writeValue(targetFile, vulnerability);
 			kafkaMessage.put(writeJsonAndMessage(targetFilePath, vulnerability.getId(), vulnerability, cveLocalDirectory));
 		}
+		LOGGER.info("writeFileToLiveKeep - end - kafkaMessage size : {}", kafkaMessage.length());
 		return kafkaMessage;
 	}
 	
@@ -115,6 +117,14 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 		else {
 			return new StringBuilder().append("file:///").append(objectKey).toString();
 		}
+	}
+	
+	public static void main(String[] args) {
+		String str = "cpe:2.3:o:novell:netware:6.0:*:*:*:*:*:*:*";
+		String[] tokens = str.split(":");
+		System.out.println(tokens[3]);
+		String product = tokens[4].replace("_", " ");
+		System.out.println(product);
 	}
 
 }

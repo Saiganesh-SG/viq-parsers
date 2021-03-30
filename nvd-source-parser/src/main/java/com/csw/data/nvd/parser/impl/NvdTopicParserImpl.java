@@ -29,10 +29,10 @@ public class NvdTopicParserImpl implements NvdTopicParser {
 	 * @throws Exception the exception
 	 */
 	@Override
-	public void run(String parseType) throws Exception {
+	public void run(String parseType, boolean processLatest) throws Exception {
 		switch (parseType) {
 		case "cve":
-			commonVulnerabilityExtractor.parseCve();
+			commonVulnerabilityExtractor.parseCve(processLatest);
 			break;
 			
 		case "cpe":

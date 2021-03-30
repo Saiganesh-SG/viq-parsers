@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +63,11 @@ public class CveProcessorImpl implements CveProcessor {
 				LOGGER.error("CVE base directory {} does not exist", cveDirectory);
 			}
 			vulnerabilities.addAll(processVulnerabilitiesFromSource(extractFilePathByExtension(sourceDirectory, ParserConstants.JSON_FILE_EXTENSION), vendorComments));
+			FileUtils.cleanDirectory(cveDirectory);
 		} catch (IOException e) {
 			LOGGER.error("Error while processing the source file : {}", e.getMessage());
 		}
+		
 		return vulnerabilities;
 	}
 

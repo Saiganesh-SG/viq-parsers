@@ -5,6 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface NvdTopicParser {
 	
-    public void run(String parseType) throws Exception;
+    public void run(String parseType, boolean processLatest) throws Exception;
     
 }

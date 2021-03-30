@@ -16,7 +16,7 @@ public class NvdSourceParserApplication implements CommandLineRunner {
 
 	@Autowired
 	private NvdTopicParser nvdTopicParser;
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(NvdSourceParserApplication.class, args);
 	}
@@ -25,9 +25,10 @@ public class NvdSourceParserApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		LOGGER.info("started the nvd parsing...");
 		String parseType = System.getProperty("topic");
-		parseType = "cve";
-		if (parseType != null) {
-			nvdTopicParser.run(parseType);
+		boolean processLatest = Boolean.parseBoolean(System.getProperty("latest"));
+		LOGGER.info("started the nvd parsing with the parameters: parseType={}, processLatest={}",parseType, processLatest);
+		if (null != parseType) {
+			nvdTopicParser.run(parseType, processLatest);
 		} else {
 			LOGGER.error("Arguments are not present. Please pass the required arguments");
 		}
