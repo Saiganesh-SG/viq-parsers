@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.csw.data.nvd.json.target.Vulnerability;
+import com.csw.data.nvd.json.targets.Vulnerability;
 import com.csw.data.util.HashingUtil;
 import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 
-import com.csw.data.nvd.json.target.Vulnerability;
+import com.csw.data.nvd.json.targets.Vulnerability;
 
 public interface LiveKeepService {
 

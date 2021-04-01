@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.csw.data.nvd.json.target.VendorComment;
-import com.csw.data.nvd.json.target.Vulnerability;
+import com.csw.data.nvd.json.targets.VendorComment;
+import com.csw.data.nvd.json.targets.Vulnerability;
 
 public interface CveProcessor {
 	
