@@ -20,8 +20,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.csw.data.nvd.config.ParseType;
-import com.csw.data.nvd.json.target.VendorComment;
-import com.csw.data.nvd.json.target.Vulnerability;
+import com.csw.data.nvd.json.targets.VendorComment;
+import com.csw.data.nvd.json.targets.Vulnerability;
 import com.csw.data.nvd.parser.CveProcessor;
 import com.csw.data.nvd.parser.helper.CveConstructor;
 import com.csw.data.util.ParserConstants;

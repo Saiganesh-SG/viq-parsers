@@ -35,13 +35,13 @@ import com.csw.data.nvd.json.source.DefNode;
 import com.csw.data.nvd.json.source.LangString;
 import com.csw.data.nvd.json.source.NvdCveFeedJson11;
 import com.csw.data.nvd.json.source.ProblemtypeDatum;
-import com.csw.data.nvd.json.target.AffectedSoftwareConfiguration;
-import com.csw.data.nvd.json.target.AffectedSoftwareConfigurationType;
-import com.csw.data.nvd.json.target.Cvssv2;
-import com.csw.data.nvd.json.target.Cvssv3;
-import com.csw.data.nvd.json.target.CweList;
-import com.csw.data.nvd.json.target.VendorComment;
-import com.csw.data.nvd.json.target.Vulnerability;
+import com.csw.data.nvd.json.targets.AffectedSoftwareConfiguration;
+import com.csw.data.nvd.json.targets.AffectedSoftwareConfigurationType;
+import com.csw.data.nvd.json.targets.Cvssv2;
+import com.csw.data.nvd.json.targets.Cvssv3;
+import com.csw.data.nvd.json.targets.CweList;
+import com.csw.data.nvd.json.targets.VendorComment;
+import com.csw.data.nvd.json.targets.Vulnerability;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
