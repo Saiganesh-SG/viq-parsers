@@ -3,6 +3,7 @@ package com.csw.data.mitre.parser.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +20,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.csw.data.mitre.cwe.pojo.WeaknessRoot;
 import com.csw.data.mitre.parser.LivekeepService;
-import com.csw.data.mitre.pojo.cwe.WeaknessRoot;
 import com.csw.data.util.HashingUtil;
 import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -64,22 +65,77 @@ public class LivekeepServiceImpl implements LivekeepService {
 	 *
 	 * @param weakness the weakness
 	 * @param sourceFilePath the source file path
+	 * @param recordStats the record stats
 	 * @return the JSON object
 	 * @throws Exception the exception
 	 */
 	@Override
-	public JSONObject writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath) throws Exception {
+	public JSONObject writeToLiveKeep(WeaknessRoot weakness, String sourceFilePath, Map<String, Integer> recordStats) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
-		String cweFile = liveKeepBasePath + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
-		File weaknessFile = new File(cweFile);
+		
+		JSONObject kafkaMessage = null;
+		String weaknessFilePath = liveKeepBasePath + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
+		File weaknessFile = new File(weaknessFilePath);
 
 		// livekeep file is written
-		mapper.writeValue(weaknessFile, weakness);
-
-		return writeJsonAndMessage(cweFile, weakness.getId(), sourceFilePath);
+		if(validateFile(weaknessFilePath, liveKeepBasePath + weakness.getId(), recordStats)) {
+			mapper.writeValue(weaknessFile, weakness);
+			kafkaMessage = writeJsonAndMessage(weaknessFilePath, weakness.getId(), sourceFilePath);
+		}
+		
+		return kafkaMessage;
 	}
 	
+	/**
+	 * Validate file.
+	 *
+	 * @param weaknessFile the weakness file
+	 * @param weaknessFileWithoutExtension the weakness file without extension
+	 * @param recordStats the record stats
+	 * @return true, if successful
+	 */
+	private boolean validateFile(String weaknessFile, String weaknessFileWithoutExtension, Map<String, Integer> recordStats) {
+		Boolean canWrite = Boolean.FALSE;
+		Path metaFilePath = Paths.get(weaknessFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
+		//new weakness file
+		if (!Files.exists(metaFilePath)) {
+			recordStats.merge("newRecords", 1, Integer::sum);
+			return Boolean.TRUE;
+		}
+		//file is modified
+		if(validateChecksum(metaFilePath, weaknessFile)) {
+			recordStats.merge("modifiedRecords", 1, Integer::sum);
+			canWrite = Boolean.TRUE;
+		}
+		return canWrite;
+	}
+
+	/**
+	 * Validate checksum.
+	 *
+	 * @param metaFilePath the meta file path
+	 * @param weaknessFile the weakness file
+	 * @return true, if successful
+	 */
+	private boolean validateChecksum(Path metaFilePath, String weaknessFile) {
+		Boolean isChanged = Boolean.FALSE;
+		try {
+			String metaFile = new String(Files.readAllBytes(metaFilePath));
+			JSONObject metaJsonObject = new JSONObject(metaFile);
+			String existingChecksum = metaJsonObject.getString("sha256");
+			String newChecksum = HashingUtil.getShaChecksum(Files.readAllBytes(Paths.get(weaknessFile)));
+			if (!newChecksum.equals(existingChecksum)) {
+				isChanged = Boolean.TRUE;
+			}
+		} catch (IOException e) {
+			LOGGER.error("IOException while proccesing the meta JSON file : {}", e.getMessage(), e);
+		} catch (JSONException e) {
+			LOGGER.error("JSONException while proccesing the meta JSON file : {}", e.getMessage(), e);
+		}
+		return isChanged;
+	}
+
 	/**
 	 * Write json and message.
 	 *

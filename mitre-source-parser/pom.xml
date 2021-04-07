@@ -83,7 +83,7 @@
 			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -95,7 +95,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
@@ -106,17 +105,15 @@
 			<artifactId>s3</artifactId>
 			<version>2.15.78</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20201115</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20201115</version>
 		</dependency>
 		<dependency>
 			<groupId>org.leadpony.justify</groupId>
@@ -146,22 +143,6 @@
 				<configuration>
 					<mainClass>com.csw.data.mitre.MitreSourceParserApplication</mainClass>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jsonschema2pojo</groupId>
-				<artifactId>jsonschema2pojo-maven-plugin</artifactId>
-				<version>1.0.2</version>
-				<configuration>
-					<sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>
-					<targetPackage>com.csw.data.nvd.pojo.cwe</targetPackage>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

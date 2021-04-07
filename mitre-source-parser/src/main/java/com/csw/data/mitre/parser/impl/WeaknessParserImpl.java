@@ -1,13 +1,6 @@
 package com.csw.data.mitre.parser.impl;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +27,6 @@ public class WeaknessParserImpl implements WeaknessParser {
 	@Value("${sourcekeep.cwe.mitre.path}")
 	private String sourceKeepBasePath;
 	
-	/** The s 3 bucket name. */
-	@Value("${data.livekeep.bucketName}")
-	private String s3BucketName;
-
-	/** The cwe path. */
-	@Value("${cwe.path}")
-	private String cwePath;
-	
 	/** The cwe download urls. */
 	@Value("#{'${parse.cwe.download.url}'.split(',')}")
 	private List<String> cweDownloadUrls;
@@ -51,41 +36,15 @@ public class WeaknessParserImpl implements WeaknessParser {
 	@Qualifier("CweDataProcessor")
 	private DataProcessor cweDataProcessor;
 	
-	/** The local flag. */
-	@Value("${data.local.flag}")
-	private boolean localFlag;
-	
 	/**
 	 * Download and parse the weakness.
 	 * @throws Exception 
 	 */
 	@Override
 	public void extractWeaknessFile() throws Exception {
-		ParserFileUtils.getDownloadedDirectoryPath(sourceKeepBasePath, cweDownloadUrls, "cpe");
-		List<String> sourceFiles = processsFilesInDirectoryWithExtension(sourceKeepBasePath, ParserConstants.XML_FILE_EXTENSION);
+		List<String> sourceFiles = ParserFileUtils.extractSourceFilesWithExtension(sourceKeepBasePath, cweDownloadUrls, "cpe", ParserConstants.XML_FILE_EXTENSION);
 		cweDataProcessor.process(sourceFiles);
 		LOGGER.info("CWE data process completed");
-	}
-	
-	/**
-	 * Processs files in directory with selected extension.
-	 *
-	 * @param directoryPath the directory path
-	 * @param fileExtension the file extension
-	 * @return the list
-	 */
-	private List<String> processsFilesInDirectoryWithExtension(String directoryPath, String fileExtension) {
-		List<String> files = new ArrayList<>();
-        try (Stream<Path> walk = Files.walk(Paths.get(directoryPath))) {
-            files = walk
-                    .filter(p -> !Files.isDirectory(p))
-                    .map(p -> p.toString().toLowerCase())
-                    .filter(f -> f.endsWith(fileExtension))
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-        	LOGGER.error("Error in reading source file from the directory: {}", e.getMessage(), e);
-		}
-        return files;
 	}
 
 }

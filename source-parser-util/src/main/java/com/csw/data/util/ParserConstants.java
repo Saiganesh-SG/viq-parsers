@@ -20,8 +20,10 @@ public final class ParserConstants {
 	/** The Constant CWE. */
 	public static final String CWE = "CWE";
 	
+	/** The Constant CVE. */
 	public static final String CVE = "CVE";
 	
+	/** The Constant CPE. */
 	public static final String CPE = "CPE";
 	
 	/** The Constant ZIP_FILE_EXTENSION. */
@@ -29,6 +31,9 @@ public final class ParserConstants {
     
     /** The Constant JSON_FILE_EXTENSION. */
     public static final String JSON_FILE_EXTENSION = ".json";
+    
+    /** The Constant META_JSON_FILE_EXTENSION. */
+    public static final String META_JSON_FILE_EXTENSION = ".meta.json";
     
     /** The Constant XML_FILE_EXTENSION. */
     public static final String XML_FILE_EXTENSION = ".xml";
