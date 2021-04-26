@@ -127,3 +127,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

@@ -77,7 +77,6 @@ public class LivekeepServiceImpl implements LivekeepService {
 		JSONObject kafkaMessage = null;
 		String weaknessFilePath = liveKeepBasePath + weakness.getId() + ParserConstants.JSON_FILE_EXTENSION;
 		File weaknessFile = new File(weaknessFilePath);
-
 		// livekeep file is written
 		if(validateFile(weaknessFilePath, liveKeepBasePath + weakness.getId(), recordStats)) {
 			mapper.writeValue(weaknessFile, weakness);

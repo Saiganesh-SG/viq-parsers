@@ -1,21 +1,14 @@
 
 package com.csw.data.mitre.cwe.pojo;
 
+import com.fasterxml.jackson.annotation.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonValue;
-
-import lombok.Getter;
-import lombok.Setter;
 
 
 /**
@@ -49,7 +42,6 @@ import lombok.Setter;
     "summary",
     "objective",
     "audience",
-    "relationships",
     "taxonomyMappings",
     "notes",
     "filter",
@@ -143,8 +135,6 @@ public class WeaknessRoot {
     private String objective;
     @JsonProperty("audience")
     private List<AudienceType> audience = new ArrayList<>();
-    @JsonProperty("relationships")
-    private List<Relationship> relationships = new ArrayList<>();
     @JsonProperty("taxonomyMappings")
     private List<TaxonomyMapping> taxonomyMappings = new ArrayList<>();
     @JsonProperty("notes")
@@ -264,10 +254,6 @@ public class WeaknessRoot {
         sb.append('=');
         sb.append(((this.audience == null)?"<null>":this.audience));
         sb.append(',');
-        sb.append("relationships");
-        sb.append('=');
-        sb.append(((this.relationships == null)?"<null>":this.relationships));
-        sb.append(',');
         sb.append("taxonomyMappings");
         sb.append('=');
         sb.append(((this.taxonomyMappings == null)?"<null>":this.taxonomyMappings));
@@ -312,7 +298,6 @@ public class WeaknessRoot {
         result = ((result* 31)+((this.title == null)? 0 :this.title.hashCode()));
         result = ((result* 31)+((this.weaknessOrdinalities == null)? 0 :this.weaknessOrdinalities.hashCode()));
         result = ((result* 31)+((this.objective == null)? 0 :this.objective.hashCode()));
-        result = ((result* 31)+((this.relationships == null)? 0 :this.relationships.hashCode()));
         result = ((result* 31)+((this.taxonomyMappings == null)? 0 :this.taxonomyMappings.hashCode()));
         result = ((result* 31)+((this.id == null)? 0 :this.id.hashCode()));
         result = ((result* 31)+((this.relatedWeaknesses == null)? 0 :this.relatedWeaknesses.hashCode()));
@@ -347,7 +332,7 @@ public class WeaknessRoot {
             return false;
         }
         WeaknessRoot rhs = ((WeaknessRoot) other);
-        return (((((((((((((((((((((((((((((((((this.notes == rhs.notes)||((this.notes!= null)&&this.notes.equals(rhs.notes)))&&((this.sources == rhs.sources)||((this.sources!= null)&&this.sources.equals(rhs.sources))))&&((this.references == rhs.references)||((this.references!= null)&&this.references.equals(rhs.references))))&&((this.description == rhs.description)||((this.description!= null)&&this.description.equals(rhs.description))))&&((this.likelihoodOfExploit == rhs.likelihoodOfExploit)||((this.likelihoodOfExploit!= null)&&this.likelihoodOfExploit.equals(rhs.likelihoodOfExploit))))&&((this.functionalAreas == rhs.functionalAreas)||((this.functionalAreas!= null)&&this.functionalAreas.equals(rhs.functionalAreas))))&&((this.title == rhs.title)||((this.title!= null)&&this.title.equals(rhs.title))))&&((this.weaknessOrdinalities == rhs.weaknessOrdinalities)||((this.weaknessOrdinalities!= null)&&this.weaknessOrdinalities.equals(rhs.weaknessOrdinalities))))&&((this.objective == rhs.objective)||((this.objective!= null)&&this.objective.equals(rhs.objective))))&&((this.relationships == rhs.relationships)||((this.relationships!= null)&&this.relationships.equals(rhs.relationships))))&&((this.taxonomyMappings == rhs.taxonomyMappings)||((this.taxonomyMappings!= null)&&this.taxonomyMappings.equals(rhs.taxonomyMappings))))&&((this.id == rhs.id)||((this.id!= null)&&this.id.equals(rhs.id))))&&((this.relatedWeaknesses == rhs.relatedWeaknesses)||((this.relatedWeaknesses!= null)&&this.relatedWeaknesses.equals(rhs.relatedWeaknesses))))&&((this.modesOfIntroduction == rhs.modesOfIntroduction)||((this.modesOfIntroduction!= null)&&this.modesOfIntroduction.equals(rhs.modesOfIntroduction))))&&((this.alternateTerms == rhs.alternateTerms)||((this.alternateTerms!= null)&&this.alternateTerms.equals(rhs.alternateTerms))))&&((this.relatedAttackPattern == rhs.relatedAttackPattern)||((this.relatedAttackPattern!= null)&&this.relatedAttackPattern.equals(rhs.relatedAttackPattern))))&&((this.summary == rhs.summary)||((this.summary!= null)&&this.summary.equals(rhs.summary))))&&((this.audience == rhs.audience)||((this.audience!= null)&&this.audience.equals(rhs.audience))))&&((this.weaknessType == rhs.weaknessType)||((this.weaknessType!= null)&&this.weaknessType.equals(rhs.weaknessType))))&&((this.abstraction == rhs.abstraction)||((this.abstraction!= null)&&this.abstraction.equals(rhs.abstraction))))&&((this.detectionMethods == rhs.detectionMethods)||((this.detectionMethods!= null)&&this.detectionMethods.equals(rhs.detectionMethods))))&&((this.affectedResources == rhs.affectedResources)||((this.affectedResources!= null)&&this.affectedResources.equals(rhs.affectedResources))))&&((this.structure == rhs.structure)||((this.structure!= null)&&this.structure.equals(rhs.structure))))&&((this.potentialMitigations == rhs.potentialMitigations)||((this.potentialMitigations!= null)&&this.potentialMitigations.equals(rhs.potentialMitigations))))&&((this.filter == rhs.filter)||((this.filter!= null)&&this.filter.equals(rhs.filter))))&&((this.contentHistory == rhs.contentHistory)||((this.contentHistory!= null)&&this.contentHistory.equals(rhs.contentHistory))))&&((this.viewType == rhs.viewType)||((this.viewType!= null)&&this.viewType.equals(rhs.viewType))))&&((this.additionalProperties == rhs.additionalProperties)||((this.additionalProperties!= null)&&this.additionalProperties.equals(rhs.additionalProperties))))&&((this.extendedDescription == rhs.extendedDescription)||((this.extendedDescription!= null)&&this.extendedDescription.equals(rhs.extendedDescription))))&&((this.applicablePlatforms == rhs.applicablePlatforms)||((this.applicablePlatforms!= null)&&this.applicablePlatforms.equals(rhs.applicablePlatforms))))&&((this.commonConsequences == rhs.commonConsequences)||((this.commonConsequences!= null)&&this.commonConsequences.equals(rhs.commonConsequences))))&&((this.status == rhs.status)||((this.status!= null)&&this.status.equals(rhs.status))));
+        return (((((((((((((((((((((((((((((((((this.notes == rhs.notes)||((this.notes!= null)&&this.notes.equals(rhs.notes)))&&((this.sources == rhs.sources)||((this.sources!= null)&&this.sources.equals(rhs.sources))))&&((this.references == rhs.references)||((this.references!= null)&&this.references.equals(rhs.references))))&&((this.description == rhs.description)||((this.description!= null)&&this.description.equals(rhs.description))))&&((this.likelihoodOfExploit == rhs.likelihoodOfExploit)||((this.likelihoodOfExploit!= null)&&this.likelihoodOfExploit.equals(rhs.likelihoodOfExploit))))&&((this.functionalAreas == rhs.functionalAreas)||((this.functionalAreas!= null)&&this.functionalAreas.equals(rhs.functionalAreas))))&&((this.title == rhs.title)||((this.title!= null)&&this.title.equals(rhs.title))))&&((this.weaknessOrdinalities == rhs.weaknessOrdinalities)||((this.weaknessOrdinalities!= null)&&this.weaknessOrdinalities.equals(rhs.weaknessOrdinalities))))&&((this.objective == rhs.objective)||((this.objective!= null)&&this.objective.equals(rhs.objective))))&&((this.taxonomyMappings == rhs.taxonomyMappings)||((this.taxonomyMappings!= null)&&this.taxonomyMappings.equals(rhs.taxonomyMappings))))&&((this.id == rhs.id)||((this.id!= null)&&this.id.equals(rhs.id))))&&((this.relatedWeaknesses == rhs.relatedWeaknesses)||((this.relatedWeaknesses!= null)&&this.relatedWeaknesses.equals(rhs.relatedWeaknesses))))&&((this.modesOfIntroduction == rhs.modesOfIntroduction)||((this.modesOfIntroduction!= null)&&this.modesOfIntroduction.equals(rhs.modesOfIntroduction))))&&((this.alternateTerms == rhs.alternateTerms)||((this.alternateTerms!= null)&&this.alternateTerms.equals(rhs.alternateTerms))))&&((this.relatedAttackPattern == rhs.relatedAttackPattern)||((this.relatedAttackPattern!= null)&&this.relatedAttackPattern.equals(rhs.relatedAttackPattern))))&&((this.summary == rhs.summary)||((this.summary!= null)&&this.summary.equals(rhs.summary))))&&((this.audience == rhs.audience)||((this.audience!= null)&&this.audience.equals(rhs.audience))))&&((this.weaknessType == rhs.weaknessType)||((this.weaknessType!= null)&&this.weaknessType.equals(rhs.weaknessType))))&&((this.abstraction == rhs.abstraction)||((this.abstraction!= null)&&this.abstraction.equals(rhs.abstraction))))&&((this.detectionMethods == rhs.detectionMethods)||((this.detectionMethods!= null)&&this.detectionMethods.equals(rhs.detectionMethods))))&&((this.affectedResources == rhs.affectedResources)||((this.affectedResources!= null)&&this.affectedResources.equals(rhs.affectedResources))))&&((this.structure == rhs.structure)||((this.structure!= null)&&this.structure.equals(rhs.structure))))&&((this.potentialMitigations == rhs.potentialMitigations)||((this.potentialMitigations!= null)&&this.potentialMitigations.equals(rhs.potentialMitigations))))&&((this.filter == rhs.filter)||((this.filter!= null)&&this.filter.equals(rhs.filter))))&&((this.contentHistory == rhs.contentHistory)||((this.contentHistory!= null)&&this.contentHistory.equals(rhs.contentHistory))))&&((this.viewType == rhs.viewType)||((this.viewType!= null)&&this.viewType.equals(rhs.viewType))))&&((this.additionalProperties == rhs.additionalProperties)||((this.additionalProperties!= null)&&this.additionalProperties.equals(rhs.additionalProperties))))&&((this.extendedDescription == rhs.extendedDescription)||((this.extendedDescription!= null)&&this.extendedDescription.equals(rhs.extendedDescription))))&&((this.applicablePlatforms == rhs.applicablePlatforms)||((this.applicablePlatforms!= null)&&this.applicablePlatforms.equals(rhs.applicablePlatforms))))&&((this.commonConsequences == rhs.commonConsequences)||((this.commonConsequences!= null)&&this.commonConsequences.equals(rhs.commonConsequences))))&&((this.status == rhs.status)||((this.status!= null)&&this.status.equals(rhs.status)))));
     }
 
 

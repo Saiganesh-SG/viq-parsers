@@ -84,8 +84,8 @@ public class CweDataProcessorImpl implements DataProcessor {
 	        
 	        //extract all the weakness data
 	        weaknessList.addAll(cweDataHelper.extractWeakness(weaknessCatalog.getWeaknesses(), externalReferenceList, weaknessMetaDataList));
-	        weaknessList.addAll(cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList));
-	        weaknessList.addAll(cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList));
+	        weaknessList.addAll(cweDataHelper.extractViews(weaknessCatalog.getViews(), externalReferenceList, weaknessMetaDataList));
+	        weaknessList.addAll(cweDataHelper.extractCategories(weaknessCatalog.getCategories(), externalReferenceList, weaknessMetaDataList));
 	        
 	        //write to livekeep and return the kafka message only for modified weakness
 	        JSONArray kafkaMessage = new JSONArray();

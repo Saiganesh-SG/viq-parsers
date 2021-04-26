@@ -129,3 +129,9 @@ $RECYCLE.BIN/
 *.lnk
 *.classpath
 *.project
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

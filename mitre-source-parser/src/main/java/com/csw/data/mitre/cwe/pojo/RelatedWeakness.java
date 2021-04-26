@@ -14,5 +14,6 @@ public class RelatedWeakness {
     public String chainId;
     public String viewId;
     public String ordinal;
+    public String abstraction;
 
 }

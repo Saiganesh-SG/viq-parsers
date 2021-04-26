@@ -9,4 +9,5 @@ public class WeaknessMetaData {
 	private String id;
 	private String title;
 	private String type;
+	private String abstraction;
 }
