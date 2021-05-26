@@ -23,7 +23,6 @@ public class NvdSourceParserApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		LOGGER.info("started the nvd parsing...");
 		String parseType = System.getProperty("topic");
 		boolean processLatest = Boolean.parseBoolean(System.getProperty("latest"));
 		LOGGER.info("started the nvd parsing with the parameters: parseType={}, processLatest={}",parseType, processLatest);

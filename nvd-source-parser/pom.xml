@@ -10,6 +10,19 @@
 	<artifactId>nvd-source-parser</artifactId>
 	<name>nvd-source-parser</name>
 	<description>This module extracts the data topic from NVD source</description>
+	
+	<properties>
+		<java.version>11</java.version>
+		<skip.unit.tests>false</skip.unit.tests>
+		<jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
+		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.language>java</sonar.language>
+		<sonar.exclusions>src/main/resources/**, **/nvd/json/**, **/nvd/jaxb/**</sonar.exclusions>
+		<sonar.coverage.exclusions>**/nvd/json/**, **/nvd/jaxb/**</sonar.coverage.exclusions>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -118,7 +131,12 @@
 			<artifactId>json</artifactId>
 			<version>20201115</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>4.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -135,17 +153,30 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.jsonschema2pojo</groupId>
-				<artifactId>jsonschema2pojo-maven-plugin</artifactId>
-				<version>1.0.2</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version>
 				<configuration>
-					<sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>
-					<targetPackage>com.csw.data.nvd.pojo.cwe</targetPackage>
+					<skipTests>${skip.unit.tests}</skipTests>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-maven-plugin.version}</version>
 				<executions>
 					<execution>
+						<id>default-prepare-agent</id>
 						<goals>
-							<goal>generate</goal>
+							<goal>prepare-agent</goal>
+						</goals>
+
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>

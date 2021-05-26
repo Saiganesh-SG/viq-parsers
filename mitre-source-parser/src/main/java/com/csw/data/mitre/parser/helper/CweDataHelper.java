@@ -1,33 +1,15 @@
 package com.csw.data.mitre.parser.helper;
 
-import com.csw.data.mitre.cwe.jaxb.AlternateTermsType.AlternateTerm;
-import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.Architecture;
-import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.Language;
-import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.OperatingSystem;
-import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.Technology;
-import com.csw.data.mitre.cwe.jaxb.AudienceType.Stakeholder;
-import com.csw.data.mitre.cwe.jaxb.*;
-import com.csw.data.mitre.cwe.jaxb.CommonConsequencesType.Consequence;
-import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.Contribution;
-import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.Modification;
-import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.PreviousEntryName;
-import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.Submission;
-import com.csw.data.mitre.cwe.jaxb.ModesOfIntroductionType.Introduction;
-import com.csw.data.mitre.cwe.jaxb.NotesType.Note;
-import com.csw.data.mitre.cwe.jaxb.PotentialMitigationsType.Mitigation;
-import com.csw.data.mitre.cwe.jaxb.RelatedAttackPatternsType.RelatedAttackPattern;
-import com.csw.data.mitre.cwe.jaxb.RelatedWeaknessesType.RelatedWeakness;
-import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog.Categories;
-import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog.ExternalReferences;
-import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog.Views;
-import com.csw.data.mitre.cwe.jaxb.WeaknessOrdinalitiesType.WeaknessOrdinality;
-import com.csw.data.mitre.cwe.pojo.AudienceType;
-import com.csw.data.mitre.cwe.pojo.*;
-import com.csw.data.mitre.cwe.pojo.WeaknessRoot.Abstraction;
-import com.csw.data.mitre.cwe.pojo.WeaknessRoot.Status;
-import com.csw.data.mitre.cwe.pojo.WeaknessRoot.Structure;
-import com.csw.data.mitre.parser.LivekeepService;
-import com.csw.data.util.ParserConstants;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +18,65 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.lang.Object;
-import java.text.SimpleDateFormat;
-import java.util.Map;
-import java.util.*;
+import com.csw.data.mitre.cwe.jaxb.AlternateTermsType.AlternateTerm;
+import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.Architecture;
+import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.Language;
+import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.OperatingSystem;
+import com.csw.data.mitre.cwe.jaxb.ApplicablePlatformsType.Technology;
+import com.csw.data.mitre.cwe.jaxb.AudienceType.Stakeholder;
+import com.csw.data.mitre.cwe.jaxb.CategoryType;
+import com.csw.data.mitre.cwe.jaxb.CommonConsequencesType.Consequence;
+import com.csw.data.mitre.cwe.jaxb.ContentHistoryType;
+import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.Contribution;
+import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.Modification;
+import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.PreviousEntryName;
+import com.csw.data.mitre.cwe.jaxb.ContentHistoryType.Submission;
+import com.csw.data.mitre.cwe.jaxb.ExternalReferenceType;
+import com.csw.data.mitre.cwe.jaxb.FunctionalAreaEnumeration;
+import com.csw.data.mitre.cwe.jaxb.MemberType;
+import com.csw.data.mitre.cwe.jaxb.ModesOfIntroductionType.Introduction;
+import com.csw.data.mitre.cwe.jaxb.NotesType.Note;
+import com.csw.data.mitre.cwe.jaxb.PhaseEnumeration;
+import com.csw.data.mitre.cwe.jaxb.PotentialMitigationsType.Mitigation;
+import com.csw.data.mitre.cwe.jaxb.ReferencesType;
+import com.csw.data.mitre.cwe.jaxb.RelatedAttackPatternsType.RelatedAttackPattern;
+import com.csw.data.mitre.cwe.jaxb.RelatedWeaknessesType.RelatedWeakness;
+import com.csw.data.mitre.cwe.jaxb.ResourceEnumeration;
+import com.csw.data.mitre.cwe.jaxb.ScopeEnumeration;
+import com.csw.data.mitre.cwe.jaxb.StructuredTextType;
+import com.csw.data.mitre.cwe.jaxb.TechnicalImpactEnumeration;
+import com.csw.data.mitre.cwe.jaxb.ViewType;
+import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog;
+import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog.Categories;
+import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog.ExternalReferences;
+import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog.Views;
+import com.csw.data.mitre.cwe.jaxb.WeaknessOrdinalitiesType.WeaknessOrdinality;
+import com.csw.data.mitre.cwe.jaxb.WeaknessType;
+import com.csw.data.mitre.cwe.pojo.AlternateTermType;
+import com.csw.data.mitre.cwe.pojo.ApplicablePlatformsRoot;
+import com.csw.data.mitre.cwe.pojo.AudienceType;
+import com.csw.data.mitre.cwe.pojo.CommonConsequence;
+import com.csw.data.mitre.cwe.pojo.ContentHistoryRoot;
+import com.csw.data.mitre.cwe.pojo.ContributionType;
+import com.csw.data.mitre.cwe.pojo.DetectionMethod;
+import com.csw.data.mitre.cwe.pojo.ModesOfIntroduction;
+import com.csw.data.mitre.cwe.pojo.ModificationType;
+import com.csw.data.mitre.cwe.pojo.NoteType;
+import com.csw.data.mitre.cwe.pojo.PlatformType;
+import com.csw.data.mitre.cwe.pojo.PotentialMitigation;
+import com.csw.data.mitre.cwe.pojo.PreviousEntryNameType;
+import com.csw.data.mitre.cwe.pojo.Reference;
+import com.csw.data.mitre.cwe.pojo.RelatedAttackPatternType;
+import com.csw.data.mitre.cwe.pojo.Source;
+import com.csw.data.mitre.cwe.pojo.SubmissionRoot;
+import com.csw.data.mitre.cwe.pojo.TaxonomyMapping;
+import com.csw.data.mitre.cwe.pojo.WeaknessMetaData;
+import com.csw.data.mitre.cwe.pojo.WeaknessRoot;
+import com.csw.data.mitre.cwe.pojo.WeaknessRoot.Abstraction;
+import com.csw.data.mitre.cwe.pojo.WeaknessRoot.Status;
+import com.csw.data.mitre.cwe.pojo.WeaknessRoot.Structure;
+import com.csw.data.mitre.parser.LivekeepService;
+import com.csw.data.util.ParserConstants;
 
 /**
  * The Class CweDataHelper.
@@ -427,20 +462,8 @@ public class CweDataHelper {
 		if(null != viewType.getMembers()) {
 			List<com.csw.data.mitre.cwe.pojo.RelatedWeakness> relatedWeaknesses = new ArrayList<>();
 			for(JAXBElement<MemberType> memberTypeJaxb: viewType.getMembers().getContent()) {
-				MemberType memberType = memberTypeJaxb.getValue();
-				com.csw.data.mitre.cwe.pojo.RelatedWeakness relatedWeakness = new com.csw.data.mitre.cwe.pojo.RelatedWeakness();
-				String cweId = String.valueOf(memberType.getCWEID());
-				String viewId = String.valueOf(memberType.getViewID());
-				WeaknessMetaData metaData = weaknessMetaDataList.get(cweId);
-				String type = metaData.getType();
-				String abstraction = metaData.getAbstraction();
-				relatedWeakness.setId((null != cweId) ? CWE_PREFIX + cweId : null);
-				relatedWeakness.setNature(memberTypeJaxb.getName().getLocalPart());
-				relatedWeakness.setViewId((null != viewId) ? CWE_PREFIX + viewId : null);
-				relatedWeakness.setType(type);
-				relatedWeakness.setAbstraction(abstraction);
+				com.csw.data.mitre.cwe.pojo.RelatedWeakness relatedWeakness = createRelatedWeakness(memberTypeJaxb, weaknessMetaDataList);
 				relatedWeaknesses.add(relatedWeakness);
-
 			}
 			weakness.setRelatedWeaknesses(relatedWeaknesses);
 		}
@@ -460,7 +483,7 @@ public class CweDataHelper {
 		return weakness;
 	}
 
-	/**
+    /**
 	 * Creates the category.
 	 *
 	 * @param categoryType the category type
@@ -480,18 +503,7 @@ public class CweDataHelper {
 		if(null != categoryType.getRelationships()) {
 			List<com.csw.data.mitre.cwe.pojo.RelatedWeakness> relatedWeaknesses = new ArrayList<>();
 			for(JAXBElement<MemberType> memberTypeJaxb: categoryType.getRelationships().getContent()) {
-				com.csw.data.mitre.cwe.pojo.RelatedWeakness relatedWeakness = new com.csw.data.mitre.cwe.pojo.RelatedWeakness();
-				MemberType memberType = memberTypeJaxb.getValue();
-				String cweId = String.valueOf(memberType.getCWEID());
-				String viewId = String.valueOf(memberType.getViewID());
-				WeaknessMetaData metaData = weaknessMetaDataList.get(cweId);
-				String type = metaData.getType();
-				String abstraction = metaData.getAbstraction();
-				relatedWeakness.setId((null != cweId) ? CWE_PREFIX + cweId : null);
-				relatedWeakness.setNature(memberTypeJaxb.getName().getLocalPart());
-				relatedWeakness.setViewId((null != viewId) ? CWE_PREFIX + viewId : null);
-				relatedWeakness.setType(type);
-				relatedWeakness.setAbstraction(abstraction);
+				com.csw.data.mitre.cwe.pojo.RelatedWeakness relatedWeakness = createRelatedWeakness(memberTypeJaxb, weaknessMetaDataList);
 				relatedWeaknesses.add(relatedWeakness);
 			}
 			weakness.setRelatedWeaknesses(relatedWeaknesses);
@@ -524,6 +536,29 @@ public class CweDataHelper {
 		weakness.setContentHistory(addContentHistory(categoryType.getContentHistory(), weakness));
 		return weakness;
 	}
+	
+	/**
+	 * Creates the related weakness.
+	 *
+	 * @param memberTypeJaxb the member type jaxb
+	 * @param weaknessMetaDataList the weakness meta data list
+	 * @return the com.csw.data.mitre.cwe.pojo. related weakness
+	 */
+	private com.csw.data.mitre.cwe.pojo.RelatedWeakness createRelatedWeakness(JAXBElement<MemberType> memberTypeJaxb, Map<String, WeaknessMetaData> weaknessMetaDataList) {
+        MemberType memberType = memberTypeJaxb.getValue();
+        com.csw.data.mitre.cwe.pojo.RelatedWeakness relatedWeakness = new com.csw.data.mitre.cwe.pojo.RelatedWeakness();
+        String cweId = String.valueOf(memberType.getCWEID());
+        String viewId = String.valueOf(memberType.getViewID());
+        WeaknessMetaData metaData = weaknessMetaDataList.get(cweId);
+        String type = metaData.getType();
+        String abstraction = metaData.getAbstraction();
+        relatedWeakness.setId((null != cweId) ? CWE_PREFIX + cweId : null);
+        relatedWeakness.setNature(memberTypeJaxb.getName().getLocalPart());
+        relatedWeakness.setViewId((null != viewId) ? CWE_PREFIX + viewId : null);
+        relatedWeakness.setType(type);
+        relatedWeakness.setAbstraction(abstraction);
+        return relatedWeakness;
+    }
 
 	/**
 	 * Adds the weakness sources.
