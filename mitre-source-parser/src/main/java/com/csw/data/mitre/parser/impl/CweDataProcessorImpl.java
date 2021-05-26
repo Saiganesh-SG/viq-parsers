@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import com.csw.data.mitre.audit.JobStatusEnumeration;
+import com.csw.data.mitre.audit.MitreJobStatusEnumeration;
 import com.csw.data.mitre.audit.MitreParserAudit;
 import com.csw.data.mitre.audit.RecordDetails;
 import com.csw.data.mitre.cwe.jaxb.WeaknessCatalog;
@@ -162,7 +162,7 @@ public class CweDataProcessorImpl implements DataProcessor {
 		audit.setEndTime(auditTimeFormat.format(endTime));
 		audit.setTotalTime(String.valueOf(jobEndTime - jobStartTime));
 		audit.setRecordDetails(recordDetails);
-		audit.setJobStatus(JobStatusEnumeration.COMPLETED);
+		audit.setJobStatus(MitreJobStatusEnumeration.COMPLETED);
 		return audit;
 	}
 	

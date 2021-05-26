@@ -11,6 +11,19 @@
 	<name>mitre-source-parser</name>
 	<description>This module extracts the data topic from Mitre</description>
 
+	<properties>
+		<java.version>11</java.version>
+		<skip.unit.tests>false</skip.unit.tests>
+		<jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
+		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.language>java</sonar.language>
+		<sonar.exclusions>src/main/resources/**, **/mitre/cwe/**</sonar.exclusions>
+		<sonar.coverage.exclusions>**/mitre/cwe/**, **/mitre/audit/**</sonar.coverage.exclusions>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -29,7 +42,6 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.14</version>
 		</dependency>
 
 		<dependency>
@@ -53,8 +65,7 @@
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
-			<version>2.3.1</version>
-		</dependency>
+			</dependency>
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
@@ -76,24 +87,16 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.11.3</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.csw.data</groupId>
 			<artifactId>source-parser-util</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -125,7 +128,16 @@
 			<artifactId>jakarta.json</artifactId>
 			<version>2.0.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>4.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -143,6 +155,35 @@
 				<configuration>
 					<mainClass>com.csw.data.mitre.MitreSourceParserApplication</mainClass>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version>
+				<configuration>
+					<skipTests>${skip.unit.tests}</skipTests>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

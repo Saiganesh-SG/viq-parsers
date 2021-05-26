@@ -3,6 +3,7 @@ package com.csw.data.nvd.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +50,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 	private S3Client s3Client;
 
 	@Override
-	public JSONArray writeFileToLiveKeep(List<Vulnerability> vulnerabilities, String cveLocalDirectory) throws IOException {
-		LOGGER.info("writeFileToLiveKeep - start - vulnerabilities size : {}", vulnerabilities.size());
+	public JSONArray writeFileToLiveKeep(List<Vulnerability> vulnerabilities, String cveLocalDirectory, Map<String, Integer> recordStats) throws IOException {
 		JSONArray kafkaMessage = new JSONArray();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
@@ -60,15 +60,51 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 			File targetFile = new File(targetFilePath);
 			
 			//livekeep file is written
-			mapper.writeValue(targetFile, vulnerability);
-			kafkaMessage.put(writeJsonAndMessage(targetFilePath, vulnerability.getId(), vulnerability, cveLocalDirectory));
+			if(validateFile(targetFilePath, cveLocalDirectory + vulnerability.getId(), recordStats)) {
+			    mapper.writeValue(targetFile, vulnerability);
+	            kafkaMessage.put(writeJsonAndMessage(targetFilePath, vulnerability.getId(), cveLocalDirectory));
+			}
 		}
-		LOGGER.info("writeFileToLiveKeep - end - kafkaMessage size : {}", kafkaMessage.length());
 		return kafkaMessage;
 	}
 	
-	private JSONObject writeJsonAndMessage(String file, String id, Vulnerability vulnerability, String cveLocalDirectory) {
+    private boolean validateFile(String weaknessFile, String weaknessFileWithoutExtension, Map<String, Integer> recordStats) {
+        Boolean canWrite = Boolean.FALSE;
+        Path metaFilePath = Paths.get(weaknessFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
+        //new weakness file
+        if (!Files.exists(metaFilePath)) {
+            recordStats.merge("newRecords", 1, Integer::sum);
+            return Boolean.TRUE;
+        }
+        //modified weakness file
+        if(validateChecksum(metaFilePath, weaknessFile)) {
+            recordStats.merge("modifiedRecords", 1, Integer::sum);
+            canWrite = Boolean.TRUE;
+        }
+        return canWrite;
+    }
+
+    private boolean validateChecksum(Path metaFilePath, String weaknessFile) {
+        Boolean isChanged = Boolean.FALSE;
+        try {
+            String metaFile = new String(Files.readAllBytes(metaFilePath));
+            JSONObject metaJsonObject = new JSONObject(metaFile);
+            String existingChecksum = metaJsonObject.getString("sha256");
+            String newChecksum = HashingUtil.getShaChecksum(Files.readAllBytes(Paths.get(weaknessFile)));
+            if (!newChecksum.equals(existingChecksum)) {
+                isChanged = Boolean.TRUE;
+            }
+        } catch (IOException e) {
+            LOGGER.error("IOException while proccesing the meta JSON file : {}", e.getMessage(), e);
+        } catch (JSONException e) {
+            LOGGER.error("JSONException while proccesing the meta JSON file : {}", e.getMessage(), e);
+        }
+        return isChanged;
+    }
+	
+	private JSONObject writeJsonAndMessage(String file, String id, String cveLocalDirectory) {
 		String fileSystemType = localFlag ? "file" : "s3";
+		LOGGER.debug("fileSystemType : {}", fileSystemType);
 		//write file to s3
 		if("s3".equalsIgnoreCase(fileSystemType)) {
 			String objectKey = s3cveBasePath + "/nvd/" + id + ParserConstants.JSON_FILE_EXTENSION;
@@ -105,7 +141,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 			message.put("uri", createFileUri(objectKey, systemType));
 			message.put("fileType", fileType);
 		} catch (JSONException e) {
-			e.printStackTrace();
+		    LOGGER.error("JSONException while creating kafka message file : {}", e.getMessage());
 		}
 		return message;
 	}
@@ -117,14 +153,6 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 		else {
 			return new StringBuilder().append("file:///").append(objectKey).toString();
 		}
-	}
-	
-	public static void main(String[] args) {
-		String str = "cpe:2.3:o:novell:netware:6.0:*:*:*:*:*:*:*";
-		String[] tokens = str.split(":");
-		System.out.println(tokens[3]);
-		String product = tokens[4].replace("_", " ");
-		System.out.println(product);
 	}
 
 }

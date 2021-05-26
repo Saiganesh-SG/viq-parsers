@@ -1,11 +1,11 @@
-package com.csw.data.mitre.audit;
+package com.csw.data.nvd.audit;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class MitreParserAudit {
+public class NvdParserAudit {
 
 	private String jobName;
 
@@ -15,7 +15,7 @@ public class MitreParserAudit {
 
 	private String totalTime;
 
-	private MitreJobStatusEnumeration jobStatus;
+	private NvdJobStatusEnumeration jobStatus;
 
 	private RecordDetails recordDetails;
 

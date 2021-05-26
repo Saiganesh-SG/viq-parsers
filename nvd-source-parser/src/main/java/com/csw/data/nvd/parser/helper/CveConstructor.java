@@ -3,7 +3,6 @@ package com.csw.data.nvd.parser.helper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,14 +48,14 @@ public class CveConstructor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CveConstructor.class);
 	
-	public Map<String, List<VendorComment>> constructVendorCommentsFromSource(Path sourceFile) {
-		VendorstatementsType vendorstatementsType = unmarshallVendorStatement(sourceFile.toString());
+	public Map<String, List<VendorComment>> constructVendorCommentsFromSource(String sourceFile) {
+		VendorstatementsType vendorstatementsType = unmarshallVendorStatement(sourceFile);
 		return extractVendorCommentJson(vendorstatementsType);
 	}
 
-	public List<Vulnerability> constructVulnerabilititesFromSource(Path sourceFile, Map<String, List<VendorComment>> vendorComments) {
+	public List<Vulnerability> constructVulnerabilititesFromSource(String sourceFile, Map<String, List<VendorComment>> vendorComments) {
 		//Extract the CVE feed files and convert CVE to JSON Object. Add the sourcekeep directory for each CVE. Add the Vendor statement accoringly
-		NvdCveFeedJson11 vulnerability = unmarshalVulnerability(sourceFile.toString());
+		NvdCveFeedJson11 vulnerability = unmarshalVulnerability(sourceFile);
 		return extractVulnerabilityJson(vulnerability, vendorComments);
 	}
 	
@@ -164,8 +163,8 @@ public class CveConstructor {
 				configuration.setRunningOnOrWith(String.valueOf(!defCpeMatch.getVulnerable()));
 				configuration.setCpe23Uri(defCpeMatch.getCpe23Uri());
 				configuration.setTitle(defCpeMatch.getCpe23Uri());
-				configuration.setVendor(getVendorFromUri(defCpeMatch.getCpe23Uri()));
-				configuration.setProduct(getProductFromUri(defCpeMatch.getCpe23Uri()));
+				configuration.setVendor(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 3));
+				configuration.setProduct(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 4));
 				configuration.setSoftwareConfigurationGroup("Configuration " + configurationNumber);
 				configuration.setVersionStart(null != defCpeMatch.getVersionStartIncluding() ? defCpeMatch.getVersionStartIncluding() : defCpeMatch.getVersionStartExcluding());
 				configuration.setVersionStartIncluding(defCpeMatch.getVersionStartIncluding());
@@ -178,14 +177,9 @@ public class CveConstructor {
 		return affectedSoftwareConfigurations;
 	}
 
-	private String getProductFromUri(String cpe23Uri) {
+	private String getDetailsFromUri(String cpe23Uri, int index) {
 		String[] tokens = cpe23Uri.split(":");
-		return tokens[4].replace("_", " ");
-	}
-	
-	private String getVendorFromUri(String cpe23Uri) {
-		String[] tokens = cpe23Uri.split(":");
-		return tokens[3].replace("_", " ");
+		return tokens[index].replace("_", " ");
 	}
 
 	private List<VendorComment> extractVendorCommentByCve(Map<String, List<VendorComment>> vendorComments, String cveId) {
@@ -205,7 +199,6 @@ public class CveConstructor {
 			nvdCveFeedJson11 = mapper.readValue(cveJson, NvdCveFeedJson11.class);
 		} catch (IOException e1) {
 			LOGGER.error("Error while unmarshalling the cve source file : {}", sourceFilePath);
-			e1.printStackTrace();
 		}
 		return nvdCveFeedJson11;
 	}
