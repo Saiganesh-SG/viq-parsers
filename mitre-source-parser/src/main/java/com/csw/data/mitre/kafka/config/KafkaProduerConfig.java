@@ -10,12 +10,31 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
+/**
+ * The Class KafkaProduerConfig.
+ */
 @Configuration
 public class KafkaProduerConfig {
 	
+	/** The producer factory. */
 	@Autowired
 	private ProducerFactory<Integer, String> producerFactory;
+	
+	/**
+	 * Kafka template.
+	 *
+	 * @return the kafka template
+	 */
+	@Bean
+    public KafkaTemplate<String, String> kafkaTemplate(){
+        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerConfig()));
+    }
 
+	/**
+	 * Producer config.
+	 *
+	 * @return the map
+	 */
 	public Map<String, Object> producerConfig(){
 		Map<String, Object> kafkaAutoConfig = ((DefaultKafkaProducerFactory<Integer, String>) producerFactory).getConfigurationProperties();
 		Map<String, Object> producerConfig = new HashMap<>();
@@ -23,8 +42,4 @@ public class KafkaProduerConfig {
 		return producerConfig;
 	}
 	
-	@Bean
-	public KafkaTemplate<String, String> kafkaTemplate(){
-		return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerConfig()));
-	}
 }

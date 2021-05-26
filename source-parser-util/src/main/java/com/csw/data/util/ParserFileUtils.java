@@ -11,8 +11,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ParserFileUtils {
 	
@@ -20,15 +24,35 @@ public class ParserFileUtils {
 	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParserFileUtils.class);
-
-	public static String getDownloadedDirectoryPath(String filePath, List<String> downloadUrls, String type)
-			throws IOException {
+	
+	/**
+	 * Processs files in directory with selected extension.
+	 *
+	 * @param sourceBaseDirectoryPath the directory path
+	 * @param downloadUrls 
+	 * @param fileExtension the file extension
+	 * @return the list
+	 */
+	public static List<String> extractSourceFilesWithExtension(String sourceBaseDirectoryPath, List<String> downloadUrls, String topic, String fileExtension) {
+		downloadedFileToSourceDirectory(sourceBaseDirectoryPath, downloadUrls, topic);
+		List<String> sourceFiles = new ArrayList<>();
+        try (Stream<Path> walk = Files.walk(Paths.get(sourceBaseDirectoryPath))) {
+            sourceFiles = walk
+                    .filter(p -> !Files.isDirectory(p))
+                    .map(p -> p.toString().toLowerCase())
+                    .filter(f -> f.endsWith(fileExtension))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+        	LOGGER.error("Error in reading source file from the directory: {}", e.getMessage(), e);
+		}
+        return sourceFiles;
+	}
+	
+	private static String downloadedFileToSourceDirectory(String filePath, List<String> downloadUrls, String type) {
 		String path = filePath;
-		if (downloadUrls != null) {
-			for (String urls : downloadUrls) {
-				LOGGER.info("cve source url :: {}", urls);
-				String zipFilePath = path + "_" + type + "_" + System.currentTimeMillis()
-						+ ParserConstants.ZIP_FILE_EXTENSION;
+		for (String urls : downloadUrls) {
+			String zipFilePath = path + "_" + type + "_" + System.currentTimeMillis() + ParserConstants.ZIP_FILE_EXTENSION;
+			try {
 				URL url = new URL(urls);
 				FileUtils.copyURLToFile(url, new File(zipFilePath));
 				List<FileHeader> fileHeaders = new ZipFile(zipFilePath).getFileHeaders();
@@ -36,12 +60,13 @@ public class ParserFileUtils {
 					String fileName = fileHeader.getFileName();
 					try {
 						new ZipFile(zipFilePath).extractFile(fileName, path);
-						FileUtils.deleteQuietly(new File(zipFilePath));
 					} catch (ZipException e) {
-						LOGGER.error(e.getMessage());
-						e.printStackTrace();
+						LOGGER.error("ZipException while extracting source file : {}", e.getMessage(), e);
 					}
+					FileUtils.deleteQuietly(new File(zipFilePath));
 				});
+			} catch (IOException e) {
+				LOGGER.error("IOException while extracting source file : {}", e.getMessage(), e);
 			}
 		}
 		return path;

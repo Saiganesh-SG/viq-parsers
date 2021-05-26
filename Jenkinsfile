@@ -9,7 +9,7 @@ node{
                                     userRemoteConfigs: [[ credentialsId: 'Jenkins_Gitlab',
                                                           url: 'git@gitlab.com:csw_beta_developers/devops/jenkins-pipeline.git']]
                  ])
-            jenkinsfile= load 'JenkinsFile/csw-ci-cd.pipeline'
+            jenkinsfile= load 'JenkinsFile/viq-ci-cd.pipeline'
     }
 }
 

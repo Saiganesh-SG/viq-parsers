@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.csw.data.mitre.parser.DataProcessor;
 import com.csw.data.mitre.parser.WeaknessParser;
-import com.csw.data.mitre.utils.ParserFileUtils;
 import com.csw.data.util.ParserConstants;
+import com.csw.data.util.ParserFileUtils;
 
 /**
  * The Class MitreSourceParserImpl.
@@ -42,7 +42,7 @@ public class WeaknessParserImpl implements WeaknessParser {
 	 */
 	@Override
 	public void extractWeaknessFile() throws Exception {
-		List<String> sourceFiles = ParserFileUtils.extractSourceFilesWithExtension(sourceKeepBasePath, cweDownloadUrls, "cpe", ParserConstants.XML_FILE_EXTENSION);
+		List<String> sourceFiles = ParserFileUtils.extractSourceFilesWithExtension(sourceKeepBasePath, cweDownloadUrls, "cwe", ParserConstants.XML_FILE_EXTENSION);
 		cweDataProcessor.process(sourceFiles);
 		LOGGER.info("CWE data process completed");
 	}

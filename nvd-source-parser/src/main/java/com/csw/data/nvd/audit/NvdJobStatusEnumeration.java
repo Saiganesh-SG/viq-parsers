@@ -1,12 +1,12 @@
-package com.csw.data.mitre.audit;
+package com.csw.data.nvd.audit;
 
-public enum JobStatusEnumeration {
+public enum NvdJobStatusEnumeration {
 
 	COMPLETED("Completed"), FAILED("Failed");
 
 	private final String status;
 
-	JobStatusEnumeration(String s) {
+	NvdJobStatusEnumeration(String s) {
 		status = s;
 	}
 
@@ -14,8 +14,8 @@ public enum JobStatusEnumeration {
 		return status;
 	}
 	
-	public static JobStatusEnumeration fromValue(String v) {
-        for (JobStatusEnumeration c: JobStatusEnumeration.values()) {
+	public static NvdJobStatusEnumeration fromValue(String v) {
+        for (NvdJobStatusEnumeration c: NvdJobStatusEnumeration.values()) {
             if (c.status.equals(v)) {
                 return c;
             }
