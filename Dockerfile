@@ -5,7 +5,7 @@ ENV LATEST_FLAG false
 ENV TOPIC_NAME cwe
 
 # Create folders for interim storage based on bucket-name
-RUN mkdir -p /app/csw-${ENVIRONMENT}-dp/sourcekeep/cwe/mitre && mkdir -p /app/csw-${ENVIRONMENT}-dp/livekeep/cwe/mitre && mkdir -p /app/certs
+RUN mkdir -p /app/csw-${ENVIRONMENT}-dp/sourcekeep/cwe/mitre && mkdir -p /app/csw-${ENVIRONMENT}-dp/livekeep/cwe/mitre && mkdir -p /app/csw-${ENVIRONMENT}-dp/sourcekeep/cve/nvd && mkdir -p /app/csw-${ENVIRONMENT}-dp/livekeep/cve/nvd && mkdir -p /app/certs
 
 # Code has reference to /csw-dev-dp .. so creating symlink for backward comptability until code is updated
 RUN cd / && ln -s /app/csw-${ENVIRONMENT}-dp csw-${ENVIRONMENT}-dp && ln -s /app/certs certs
