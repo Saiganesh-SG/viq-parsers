@@ -148,7 +148,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 	
 	private Object createFileUri(String objectKey, String systemType) {
 		if("s3".equalsIgnoreCase(systemType)) {
-			return new StringBuilder().append("s3://").append(objectKey).toString();
+			return new StringBuilder().append("s3:/").append(objectKey).toString();
 		}
 		else {
 			return new StringBuilder().append("file:///").append(objectKey).toString();
