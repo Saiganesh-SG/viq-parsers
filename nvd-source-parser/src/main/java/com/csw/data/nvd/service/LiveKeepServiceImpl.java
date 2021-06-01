@@ -107,7 +107,7 @@ public class LiveKeepServiceImpl implements LiveKeepService {
 		LOGGER.debug("fileSystemType : {}", fileSystemType);
 		//write file to s3
 		if("s3".equalsIgnoreCase(fileSystemType)) {
-			String objectKey = s3cveBasePath + "/nvd/" + id + ParserConstants.JSON_FILE_EXTENSION;
+			String objectKey = s3cveBasePath + "nvd/" + id + ParserConstants.JSON_FILE_EXTENSION;
 			PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
 			s3Client.putObject(request, Paths.get(file));
 		}
