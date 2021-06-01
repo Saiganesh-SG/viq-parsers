@@ -195,8 +195,7 @@ public class CveConstructor {
 		ObjectMapper mapper = new ObjectMapper();
 		NvdCveFeedJson11 nvdCveFeedJson11 = null;
 		try {
-			String cveJson = FileUtils.readFileToString(new File(sourceFilePath), StandardCharsets.UTF_8);
-			nvdCveFeedJson11 = mapper.readValue(cveJson, NvdCveFeedJson11.class);
+			nvdCveFeedJson11 = mapper.readValue(new File(sourceFilePath), NvdCveFeedJson11.class);
 		} catch (IOException e1) {
 			LOGGER.error("Error while unmarshalling the cve source file : {}", sourceFilePath);
 		}
