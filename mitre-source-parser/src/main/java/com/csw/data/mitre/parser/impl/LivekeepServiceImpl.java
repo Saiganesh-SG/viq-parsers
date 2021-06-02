@@ -27,8 +27,12 @@ import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
  * The Class LivekeepServiceImpl.
@@ -83,7 +87,7 @@ public class LivekeepServiceImpl implements LivekeepService {
         File weaknessFile = new File(weaknessFilePath);
 
         // livekeep file is written
-        if (validateFile(weaknessFilePath, liveKeepBasePath + weakness.getId(), recordStats)) {
+        if (validateFile(weaknessFilePath, liveKeepBasePath + weakness.getId(), recordStats, weakness.getId())) {
             mapper.writeValue(weaknessFile, weakness);
             kafkaMessage = writeJsonAndMessage(weaknessFilePath, weakness.getId(), sourceFilePath);
         }
@@ -131,11 +135,26 @@ public class LivekeepServiceImpl implements LivekeepService {
      *            the weakness file without extension
      * @param recordStats
      *            the record stats
+     * @param weaknessId 
      * @return true, if successful
      */
-    private boolean validateFile(String weaknessFile, String weaknessFileWithoutExtension, Map<String, Integer> recordStats) {
+    private boolean validateFile(String weaknessFile, String weaknessFileWithoutExtension, Map<String, Integer> recordStats, String weaknessId) {
         Boolean canWriteFile = Boolean.FALSE;
-        Path metaJsonFilePath = Paths.get(weaknessFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
+        Path metaJsonFilePath = null;
+        
+        String fileSystemType = localFlag ? "file" : "s3";
+        if ("s3".equalsIgnoreCase(fileSystemType)) {
+            String objectKey = cwePath + "/mitre/" + weaknessId + ParserConstants.JSON_FILE_EXTENSION;
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
+            ResponseInputStream<GetObjectResponse> weaknessS3Object = s3Client.getObject(getObjectRequest);
+            
+            metaJsonFilePath = null;
+        }
+        else {
+            metaJsonFilePath = Paths.get(weaknessFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
+        }
+        
+        
 
         // new weakness file detected
         if (!Files.exists(metaJsonFilePath)) {
@@ -165,14 +184,23 @@ public class LivekeepServiceImpl implements LivekeepService {
      */
     private JSONObject writeJsonAndMessage(String cweFile, String weaknessId, String sourceFilePath) {
         String fileSystemType = localFlag ? "file" : "s3";
-        // write file to s3
+        
+        //generate meta file
+        Path metaFile = generateMetaFile(cweFile, sourceFilePath, liveKeepBasePath);
+        
+        // write files to s3
         if ("s3".equalsIgnoreCase(fileSystemType)) {
             String objectKey = cwePath + "/mitre/" + weaknessId + ParserConstants.JSON_FILE_EXTENSION;
             PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
             s3Client.putObject(request, Paths.get(cweFile));
+            
+            if(null != metaFile) {
+                String metaFileObjectKey = cwePath + "/mitre/" + weaknessId + ParserConstants.META_JSON_FILE_EXTENSION;
+                PutObjectRequest metaFileRequest = PutObjectRequest.builder().bucket(s3BucketName).key(metaFileObjectKey).build();
+                s3Client.putObject(metaFileRequest, metaFile);
+            }
         }
-        // generate meta json file
-        generateMetaFile(cweFile, sourceFilePath, liveKeepBasePath);
+        
         // create and return the kafka message
         return createKafkaMessage(weaknessId, cweFile, ParserConstants.CWE, fileSystemType);
     }
@@ -187,7 +215,8 @@ public class LivekeepServiceImpl implements LivekeepService {
      * @param cweLiveKeepDirectory
      *            the cwe live keep directory
      */
-    private void generateMetaFile(String cweFilePath, String sourceFilePath, String cweLiveKeepDirectory) {
+    private Path generateMetaFile(String cweFilePath, String sourceFilePath, String cweLiveKeepDirectory) {
+        Path metaFilePath = null;
         try {
             String shaChecksum = HashingUtil.getShaChecksum(Files.readAllBytes(Paths.get(cweFilePath)));
             ObjectMapper mapper = new ObjectMapper();
@@ -199,11 +228,13 @@ public class LivekeepServiceImpl implements LivekeepService {
             map.put("sourceFiles", sourceFileLocation);
 
             String fileName = FilenameUtils.getBaseName(cweFilePath);
+            metaFilePath = Paths.get(cweLiveKeepDirectory + fileName + ".meta.json");
             mapper.writeValue(Paths.get(cweLiveKeepDirectory + fileName + ".meta.json").toFile(), map);
         }
         catch (IOException e) {
             LOGGER.error("IOException while proccesing the Json file");
         }
+        return metaFilePath;
     }
 
     /**

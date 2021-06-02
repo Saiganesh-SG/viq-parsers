@@ -552,11 +552,13 @@ public class CweDataHelper {
         WeaknessMetaData metaData = weaknessMetaDataList.get(cweId);
         String type = metaData.getType();
         String abstraction = metaData.getAbstraction();
+        String title = metaData.getTitle();
         relatedWeakness.setId((null != cweId) ? CWE_PREFIX + cweId : null);
         relatedWeakness.setNature(memberTypeJaxb.getName().getLocalPart());
         relatedWeakness.setViewId((null != viewId) ? CWE_PREFIX + viewId : null);
         relatedWeakness.setType(type);
         relatedWeakness.setAbstraction(abstraction);
+        relatedWeakness.setTitle(title);
         return relatedWeakness;
     }
 
