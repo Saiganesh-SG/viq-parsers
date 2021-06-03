@@ -36,7 +36,7 @@ public class NvdTopicParserImpl implements NvdTopicParser {
 			break;
 			
 		case "cpe":
-			LOGGER.debug("Started Parsing CPE");
+		    commonVulnerabilityExtractor.parseCpe();
 			break;
 			
 		default:

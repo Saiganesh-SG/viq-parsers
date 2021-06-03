@@ -31,7 +31,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
 @Qualifier("LiveKeepService")
-public class LiveKeepServiceImpl implements LiveKeepService {
+public class LiveKeepServiceImpl implements LiveKeepService<Vulnerability> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LiveKeepServiceImpl.class);
 	
