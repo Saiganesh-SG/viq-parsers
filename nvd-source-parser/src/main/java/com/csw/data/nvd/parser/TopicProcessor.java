@@ -2,10 +2,8 @@ package com.csw.data.nvd.parser;
 
 import java.util.List;
 
-public interface TopicProcessor<T, U> {
+public interface TopicProcessor<T> {
     
-    T unmarshallObjectFromSourceFile(String sourceFilePath);
-
-    List<U> extractTopicContentFromSource(T sourceFileObject);
+    List<T> unmarshallObjectFromSourceFile(String sourceFilePath);
 
 }
