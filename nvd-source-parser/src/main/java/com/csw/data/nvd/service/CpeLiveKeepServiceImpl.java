@@ -108,7 +108,7 @@ public class CpeLiveKeepServiceImpl implements LiveKeepService<DefCpeMatch> {
         LOGGER.debug("fileSystemType : {}", fileSystemType);
         //write file to s3
         if("s3".equalsIgnoreCase(fileSystemType)) {
-            String objectKey = s3cpeBasePath + "cpe/" + cleansedId + ParserConstants.JSON_FILE_EXTENSION;
+            String objectKey = s3cpeBasePath + "nvd/" + cleansedId + ParserConstants.JSON_FILE_EXTENSION;
             PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
             s3Client.putObject(request, Paths.get(file));
         }
