@@ -2,7 +2,6 @@ package com.csw.data.nvd.parser.helper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,8 +37,10 @@ import com.csw.data.nvd.json.targets.AffectedSoftwareConfigurationType;
 import com.csw.data.nvd.json.targets.Cvssv2;
 import com.csw.data.nvd.json.targets.Cvssv3;
 import com.csw.data.nvd.json.targets.CweList;
+import com.csw.data.nvd.json.targets.Reference;
 import com.csw.data.nvd.json.targets.VendorComment;
 import com.csw.data.nvd.json.targets.Vulnerability;
+import com.csw.data.nvd.json.targets.VulnerabilityRiskScore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
@@ -59,14 +59,14 @@ public class CveConstructor {
 		return extractVulnerabilityJson(vulnerability, vendorComments);
 	}
 	
-	private List<Vulnerability> extractVulnerabilityJson(NvdCveFeedJson11 nvdCveFeedJson11, Map<String, List<VendorComment>> vendorComments) {
-		List<Vulnerability> vulnerabilities = new ArrayList<>();
-		List<DefCveItem> cveItems = nvdCveFeedJson11.getCVEItems();
-		for (DefCveItem cveItem : cveItems) {
-			vulnerabilities.add(constructVulnerabilityJson(cveItem, vendorComments));
-		}
-		return vulnerabilities;
-	}
+    private List<Vulnerability> extractVulnerabilityJson(NvdCveFeedJson11 nvdCveFeedJson11, Map<String, List<VendorComment>> vendorComments) {
+        List<Vulnerability> vulnerabilities = new ArrayList<>();
+        List<DefCveItem> cveItems = nvdCveFeedJson11.getCVEItems();
+        for (DefCveItem cveItem : cveItems) {
+            vulnerabilities.add(constructVulnerabilityJson(cveItem, vendorComments));
+        }
+        return vulnerabilities;
+    }
 	
 	private Vulnerability constructVulnerabilityJson(DefCveItem cveItem, Map<String, List<VendorComment>> vendorComments) {
 		Vulnerability vulnerability = new Vulnerability();
@@ -134,6 +134,25 @@ public class CveConstructor {
 		List<VendorComment> comments = extractVendorCommentByCve(vendorComments, cve.getCVEDataMeta().getId());
 		vulnerability.setVendorComments(comments);
 		
+        if (null != cve.getReferences() && !CollectionUtils.isEmpty(cve.getReferences().getReferenceData())) {
+            List<Reference> references = new ArrayList<>(cve.getReferences().getReferenceData().size());
+            List<com.csw.data.nvd.json.source.Reference> sourceReferences = cve.getReferences().getReferenceData();
+            for (com.csw.data.nvd.json.source.Reference sourceReference : sourceReferences) {
+                Reference reference = new Reference();
+                reference.setName(sourceReference.getName());
+                reference.setUrl(sourceReference.getUrl());
+                reference.setRefsource(sourceReference.getRefsource());
+                if(!CollectionUtils.isEmpty(sourceReference.getTags())) {
+                    reference.setTags(sourceReference.getTags());
+                }
+                references.add(reference);
+            }
+            vulnerability.setReferences(references);
+        }
+        
+        VulnerabilityRiskScore riskScore = constructVulnerabilityScore();
+        vulnerability.setVulnerabilityRiskScore(riskScore);
+		
 		List<DefNode> defNodes = cveItem.getConfigurations().getNodes();
 		List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations = new ArrayList<>();
 		for (int i = 0; i < defNodes.size(); i++) {
@@ -154,7 +173,17 @@ public class CveConstructor {
 		return vulnerability;
 	}
 
-	private List<AffectedSoftwareConfiguration> getSoftwareConfiguration(List<DefCpeMatch> cpeMatchs, int configurationNumber) {
+	private VulnerabilityRiskScore constructVulnerabilityScore() {
+	    VulnerabilityRiskScore riskScore = new VulnerabilityRiskScore();
+	    riskScore.setScore("null");
+	    riskScore.setSeverity("null");
+	    riskScore.setVersion("null");
+	    riskScore.setLastUpdatedDate("null");
+	    riskScore.setReasonForChange("null");
+        return riskScore;
+    }
+
+    private List<AffectedSoftwareConfiguration> getSoftwareConfiguration(List<DefCpeMatch> cpeMatchs, int configurationNumber) {
 		List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations = new ArrayList<>();
 		configurationNumber = configurationNumber+1;
 			for (DefCpeMatch defCpeMatch : cpeMatchs) {
