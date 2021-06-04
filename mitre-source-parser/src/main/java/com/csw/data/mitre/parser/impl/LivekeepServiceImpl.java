@@ -27,12 +27,8 @@ import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
  * The Class LivekeepServiceImpl.
@@ -139,36 +135,19 @@ public class LivekeepServiceImpl implements LivekeepService {
      * @return true, if successful
      */
     private boolean validateFile(String weaknessFile, String weaknessFileWithoutExtension, Map<String, Integer> recordStats, String weaknessId) {
-        Boolean canWriteFile = Boolean.FALSE;
-        Path metaJsonFilePath = null;
-        
-        String fileSystemType = localFlag ? "file" : "s3";
-        if ("s3".equalsIgnoreCase(fileSystemType)) {
-            String objectKey = cwePath + "/mitre/" + weaknessId + ParserConstants.JSON_FILE_EXTENSION;
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
-            ResponseInputStream<GetObjectResponse> weaknessS3Object = s3Client.getObject(getObjectRequest);
-            
-            metaJsonFilePath = null;
-        }
-        else {
-            metaJsonFilePath = Paths.get(weaknessFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
-        }
-        
-        
-
-        // new weakness file detected
-        if (!Files.exists(metaJsonFilePath)) {
+        Boolean canWrite = Boolean.FALSE;
+        Path metaFilePath = Paths.get(weaknessFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
+        //new weakness file
+        if (!Files.exists(metaFilePath)) {
             recordStats.merge("newRecords", 1, Integer::sum);
             return Boolean.TRUE;
         }
-
-        // file modification detected
-        if (validateChecksum(metaJsonFilePath, weaknessFile)) {
+        //modified weakness file
+        if(validateChecksum(metaFilePath, weaknessFile)) {
             recordStats.merge("modifiedRecords", 1, Integer::sum);
-            canWriteFile = Boolean.TRUE;
+            canWrite = Boolean.TRUE;
         }
-
-        return canWriteFile;
+        return canWrite;
     }
 
     /**
