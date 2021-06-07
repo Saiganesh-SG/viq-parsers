@@ -15,6 +15,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,9 +99,11 @@ public class CweDataProcessorImpl implements DataProcessor {
 	        
 	        LOGGER.info("kafkaMessage size :: {}", kafkaMessage.length());
 	        
+	        JSONObject updatedMessage = updateKafkaMessage(kafkaMessage);
+	        
 	        //publish the kafka message
 			try {
-				kafkaTemplate.send(kafkaTopic, kafkaMessage.toString()).get();
+				kafkaTemplate.send(kafkaTopic, updatedMessage.toString()).get();
 			} catch (Exception e) {
 				LOGGER.info("Error while sending the message : {}", e.getMessage());
 			}
@@ -117,6 +120,20 @@ public class CweDataProcessorImpl implements DataProcessor {
 	}
 
 	/**
+	 * Update kafka message.
+	 *
+	 * @param kafkaMessage the kafka message
+	 * @return the JSON object
+	 * @throws JSONException the JSON exception
+	 */
+	private JSONObject updateKafkaMessage(JSONArray kafkaMessage) throws JSONException {
+	    JSONObject jsonObject = new JSONObject();
+	    jsonObject.put("forceUpdate", "true");
+	    jsonObject.put("messages", kafkaMessage);
+        return jsonObject;
+    }
+
+    /**
 	 * Unmarshal weakness catalog.
 	 *
 	 * @param sourceFilePath the source file path
