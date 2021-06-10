@@ -72,10 +72,17 @@ public class CveConstructor {
 		Vulnerability vulnerability = new Vulnerability();
 		CVEJSON40Min11 cve = cveItem.getCve();
 		vulnerability.setId(cve.getCVEDataMeta().getId());
-		vulnerability.setDescription(cve.getDescription().getDescriptionData().get(0).getValue());
 		vulnerability.setAssigner(cve.getCVEDataMeta().getAssigner());
 		vulnerability.setPublishedDate(cveItem.getPublishedDate());
 		vulnerability.setLastModifiedDate(cveItem.getLastModifiedDate());
+		
+		if(null != cve.getDescription() && !CollectionUtils.isEmpty(cve.getDescription().getDescriptionData())) {
+		    List<String> desciptions = new ArrayList<>();
+		    for (LangString langString : cve.getDescription().getDescriptionData()) {
+		        desciptions.add(langString.getValue());
+            }
+		    vulnerability.setDescription(desciptions);
+		}
 		
 		BaseMetricV2 baseMetricV2 = cveItem.getImpact().getBaseMetricV2();
 		if(null != baseMetricV2) {
@@ -179,7 +186,7 @@ public class CveConstructor {
 	    riskScore.setSeverity("null");
 	    riskScore.setVersion("null");
 	    riskScore.setLastUpdatedDate("null");
-	    riskScore.setReasonForChange("null");
+	    riskScore.setReasonForChange(new ArrayList<String>(1));
         return riskScore;
     }
 
