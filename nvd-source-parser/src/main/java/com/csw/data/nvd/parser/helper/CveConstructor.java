@@ -202,10 +202,8 @@ public class CveConstructor {
 				configuration.setVendor(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 3));
 				configuration.setProduct(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 4));
 				configuration.setSoftwareConfigurationGroup("Configuration " + configurationNumber);
-				configuration.setVersionStart(null != defCpeMatch.getVersionStartIncluding() ? defCpeMatch.getVersionStartIncluding() : defCpeMatch.getVersionStartExcluding());
 				configuration.setVersionStartIncluding(defCpeMatch.getVersionStartIncluding());
 				configuration.setVersionStartExcluding(defCpeMatch.getVersionStartExcluding());
-				configuration.setVersionEnd(null != defCpeMatch.getVersionStartIncluding() ? defCpeMatch.getVersionEndIncluding() : defCpeMatch.getVersionEndExcluding());
 				configuration.setVersionEndIncluding(defCpeMatch.getVersionEndIncluding());
 				configuration.setVersionEndExcluding(defCpeMatch.getVersionEndExcluding());
 				affectedSoftwareConfigurations.add(configuration);
