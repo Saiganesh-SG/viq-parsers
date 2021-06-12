@@ -54,6 +54,8 @@ public class Cvssv2 {
     private String baseMetricV2exploitabilityScore;
     @JsonProperty("baseMetricV2impactScore")
     private String baseMetricV2impactScore;
+    @JsonProperty("userInteractionRequired")
+    private String userInteractionRequired;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -197,4 +199,12 @@ public class Cvssv2 {
         this.additionalProperties.put(name, value);
     }
 
+    public String getUserInteractionRequired() {
+        return userInteractionRequired;
+    }
+
+    public void setUserInteractionRequired(String userInteractionRequired) {
+        this.userInteractionRequired = userInteractionRequired;
+    }
+    
 }

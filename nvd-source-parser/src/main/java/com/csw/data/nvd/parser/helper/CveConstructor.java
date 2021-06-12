@@ -100,6 +100,7 @@ public class CveConstructor {
 			cvssv2.setBaseMetricAcInsufInfo(String.valueOf(baseMetricV2.getAcInsufInfo()));
 			cvssv2.setBaseMetricV2exploitabilityScore(String.valueOf(baseMetricV2.getExploitabilityScore()));
 			cvssv2.setBaseMetricV2impactScore(String.valueOf(baseMetricV2.getImpactScore()));
+			cvssv2.setUserInteractionRequired(null != baseMetricV2.getUserInteractionRequired() ? String.valueOf(baseMetricV2.getUserInteractionRequired()) : null);
 			vulnerability.setCvssv2(cvssv2);
 		}
 		
