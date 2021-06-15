@@ -7,9 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -175,13 +177,24 @@ public class CveConstructor {
 			}
 		}
 		AffectedSoftwareConfigurationType affectedSoftwareConfigurationType = new AffectedSoftwareConfigurationType();
-		affectedSoftwareConfigurationType.setAffectedProductCount(String.valueOf(affectedSoftwareConfigurations.size()));
+		affectedSoftwareConfigurationType.setAffectedProductCount(extractAffectedProductCount(affectedSoftwareConfigurations));
 		affectedSoftwareConfigurationType.setSoftwareConfigurations(affectedSoftwareConfigurations);
 		vulnerability.setAffectedSoftwareConfigurations(affectedSoftwareConfigurationType);
 		return vulnerability;
 	}
 
-	private VulnerabilityRiskScore constructVulnerabilityScore() {
+	private String extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
+	    Set<String> uniqueProductSet = new HashSet<>();
+        for (AffectedSoftwareConfiguration affectedSoftwareConfiguration : affectedSoftwareConfigurations) {
+            String vendor = affectedSoftwareConfiguration.getVendor();
+            String product = affectedSoftwareConfiguration.getProduct();
+            String uniqueVendorProduct = vendor.concat(product);
+            uniqueProductSet.add(uniqueVendorProduct);
+        }
+        return String.valueOf(uniqueProductSet.size());
+    }
+
+    private VulnerabilityRiskScore constructVulnerabilityScore() {
 	    VulnerabilityRiskScore riskScore = new VulnerabilityRiskScore();
 	    riskScore.setScore("null");
 	    riskScore.setSeverity("null");
