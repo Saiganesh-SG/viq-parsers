@@ -56,7 +56,7 @@ public class CpeLiveKeepServiceImpl implements LiveKeepService<DefCpeMatch> {
         mapper.setSerializationInclusion(Include.NON_NULL);
         
         for (DefCpeMatch defCpeMatch : defCpeMatchs) {
-            String cleansedId = defCpeMatch.getCpe23Uri().replaceAll("[^a-zA-Z0-9\\._]+", "_");
+            String cleansedId = generateCpeFileName(defCpeMatch);
             String targetFilePath = cpeLocalDirectory + cleansedId + ParserConstants.JSON_FILE_EXTENSION;
             File targetFile = new File(targetFilePath);
             
@@ -69,6 +69,25 @@ public class CpeLiveKeepServiceImpl implements LiveKeepService<DefCpeMatch> {
         return kafkaMessage;
     }
     
+    private String generateCpeFileName(DefCpeMatch defCpeMatch) {
+        var cpeMatchStringBuilder = new StringBuilder();
+        cpeMatchStringBuilder.append(defCpeMatch.getCpe23Uri());
+        if (null != defCpeMatch.getVersionStartExcluding()) {
+            cpeMatchStringBuilder.append(defCpeMatch.getVersionStartExcluding());
+        }
+        if (null != defCpeMatch.getVersionStartIncluding()) {
+            cpeMatchStringBuilder.append(defCpeMatch.getVersionStartIncluding());
+        }
+        if (null != defCpeMatch.getVersionEndExcluding()) {
+            cpeMatchStringBuilder.append(defCpeMatch.getVersionEndExcluding());
+        }
+        if (null != defCpeMatch.getVersionEndIncluding()) {
+            cpeMatchStringBuilder.append(defCpeMatch.getVersionEndIncluding());
+        }
+        String hashCode = String.valueOf(Math.abs(cpeMatchStringBuilder.hashCode()));
+        return hashCode;
+    }
+
     private boolean validateFile(String cpeFile, String cpeFileWithoutExtension, Map<String, Integer> recordStats) {
         Boolean canWrite = Boolean.FALSE;
         Path metaFilePath = Paths.get(cpeFileWithoutExtension + ParserConstants.META_JSON_FILE_EXTENSION);
