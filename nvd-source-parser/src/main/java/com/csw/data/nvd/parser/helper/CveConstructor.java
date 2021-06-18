@@ -102,7 +102,7 @@ public class CveConstructor {
 			cvssv2.setBaseMetricAcInsufInfo(String.valueOf(baseMetricV2.getAcInsufInfo()));
 			cvssv2.setBaseMetricV2exploitabilityScore(String.valueOf(baseMetricV2.getExploitabilityScore()));
 			cvssv2.setBaseMetricV2impactScore(String.valueOf(baseMetricV2.getImpactScore()));
-			cvssv2.setUserInteractionRequired(null != baseMetricV2.getUserInteractionRequired() ? String.valueOf(baseMetricV2.getUserInteractionRequired()) : null);
+			cvssv2.setUserInteractionRequired(getCvssv2UserInteraction(baseMetricV2.getUserInteractionRequired()));
 			vulnerability.setCvssv2(cvssv2);
 		}
 		
@@ -183,7 +183,17 @@ public class CveConstructor {
 		return vulnerability;
 	}
 
-	private String extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
+	private String getCvssv2UserInteraction(Boolean userInteractionRequired) {
+        if(null != userInteractionRequired) {
+            if(userInteractionRequired) {
+                return "REQUIRED";
+            }
+            return "NONE";
+        }
+        return null;
+    }
+
+    private String extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
 	    Set<String> uniqueProductSet = new HashSet<>();
         for (AffectedSoftwareConfiguration affectedSoftwareConfiguration : affectedSoftwareConfigurations) {
             String vendor = affectedSoftwareConfiguration.getVendor();
