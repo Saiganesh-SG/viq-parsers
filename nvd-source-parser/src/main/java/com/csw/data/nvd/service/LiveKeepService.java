@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.json.JSONArray;
 
+import com.csw.data.nvd.json.cpe.source.DefCpeMatch;
 import com.csw.data.nvd.json.targets.Vulnerability;
 
 public interface LiveKeepService<T> {

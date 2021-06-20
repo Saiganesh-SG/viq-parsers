@@ -26,16 +26,8 @@ public class CpeProcessor implements TopicProcessor<DefCpeMatch> {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CpeProcessor.class);
 
-    /**
-     * Unmarshall NvdCpeMatch from source file.
-     *
-     * @param sourceFilePath the source file path
-     * @param topic the topic
-     * @return the nvd cpe match
-     */
     @Override
     public List<DefCpeMatch> unmarshallObjectFromSourceFile(String sourceFilePath) {
-        
         List<DefCpeMatch> defCpeMatchs = new ArrayList<>();
         try {
             defCpeMatchs = parseJsonFromFile(new File(sourceFilePath));
