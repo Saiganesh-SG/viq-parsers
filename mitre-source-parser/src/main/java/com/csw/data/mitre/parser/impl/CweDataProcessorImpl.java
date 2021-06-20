@@ -44,22 +44,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Qualifier("CweDataProcessor")
 public class CweDataProcessorImpl implements DataProcessor {
 
-	/** The Constant logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(CweDataProcessorImpl.class);
 	
-	/** The kafka template. */
 	@Autowired
 	private KafkaTemplate<String, String> kafkaTemplate;
 	
-	/** The kafka topic. */
-	@Value("${data.kafka.topic}")
-	private String kafkaTopic;
+	@Value("${data.kafka.weakness.topic}")
+    private String weaknessKafkaTopic;
 	
-	/** The cwe data helper. */
 	@Autowired
 	private CweDataHelper cweDataHelper;
 	
-	/** The livekeep service. */
 	@Autowired
 	@Qualifier("LivekeepService")
 	private LivekeepService livekeepService;
@@ -103,7 +98,7 @@ public class CweDataProcessorImpl implements DataProcessor {
 	        
 	        //publish the kafka message
 			try {
-				kafkaTemplate.send(kafkaTopic, updatedMessage.toString()).get();
+				kafkaTemplate.send(weaknessKafkaTopic, updatedMessage.toString()).get();
 			} catch (Exception e) {
 				LOGGER.info("Error while sending the message : {}", e.getMessage());
 			}

@@ -17,7 +17,7 @@ public class Reference {
     @JsonProperty("name")
     private String name;
     
-    @JsonProperty("refsource")
+    @JsonProperty("source")
     private String refsource;
     
     @JsonProperty("tags")
