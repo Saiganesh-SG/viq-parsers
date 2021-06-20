@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -39,14 +40,14 @@ import java.util.Map;
     "relatedAttackPattern",
     "functionalAreas",
     "affectedResources",
-    "summary",
     "objective",
     "audience",
     "taxonomyMappings",
     "notes",
     "filter",
     "references",
-    "contentHistory"
+    "contentHistory",
+    "summary"
 })
 @Getter
 @Setter
@@ -129,8 +130,6 @@ public class WeaknessRoot {
     private List<String> functionalAreas = new ArrayList<>();
     @JsonProperty("affectedResources")
     private List<String> affectedResources = new ArrayList<>();
-    @JsonProperty("summary")
-    private String summary;
     @JsonProperty("objective")
     private String objective;
     @JsonProperty("audience")
@@ -145,6 +144,10 @@ public class WeaknessRoot {
     private List<Reference> references = new ArrayList<>();
     @JsonProperty("contentHistory")
     private ContentHistoryRoot contentHistory;
+    @JsonProperty("vulnerabilities")
+    private Set<WeaknessVulnerabilty> vulnerabilities;
+    @JsonProperty("summary")
+    private Summary summary;
     private String lastUpdatedDate;
     private String submissionDate;
 

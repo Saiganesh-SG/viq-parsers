@@ -496,7 +496,7 @@ public class CweDataHelper {
 		weakness.setWeaknessType(CATEGORY);
 		weakness.setSources(addWeaknessSources(String.valueOf(categoryType.getID()), ParserConstants.MITRE));
 		weakness.setTitle(categoryType.getName());
-		weakness.setSummary(null != categoryType.getSummary() ? String.valueOf(categoryType.getSummary().getContent().get(0)) : null);
+		weakness.setDescription(null != categoryType.getSummary() ? String.valueOf(categoryType.getSummary().getContent().get(0)) : null);
 		weakness.setStatus(Status.fromValue(categoryType.getStatus().value()));
 
 
