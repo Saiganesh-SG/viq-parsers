@@ -54,13 +54,13 @@ public class Cvssv3 {
     @JsonProperty("availabilityImpact")
     private String cvssV3availabilityImpact;
     @JsonProperty("score")
-    private String cvssV3baseScore;
+    private float cvssV3baseScore;
     @JsonProperty("severity")
     private String cvssV3baseSeverity;
     @JsonProperty("exploitabilityScore")
-    private String baseMetricV3exploitabilityScore;
+    private float baseMetricV3exploitabilityScore;
     @JsonProperty("impactScore")
-    private String baseMetricV3impactScore;
+    private float baseMetricV3impactScore;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
 }
