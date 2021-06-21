@@ -4,14 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -75,8 +77,8 @@ public class CveConstructor {
 		CVEJSON40Min11 cve = cveItem.getCve();
 		vulnerability.setId(cve.getCVEDataMeta().getId());
 		vulnerability.setAssigner(cve.getCVEDataMeta().getAssigner());
-		vulnerability.setPublishedDate(cveItem.getPublishedDate());
-		vulnerability.setLastModifiedDate(cveItem.getLastModifiedDate());
+		vulnerability.setPublishedDate(formatDate(cveItem.getPublishedDate()));
+		vulnerability.setLastModifiedDate(formatDate(cveItem.getLastModifiedDate()));
 		
 		if(null != cve.getDescription() && !CollectionUtils.isEmpty(cve.getDescription().getDescriptionData())) {
 		    List<String> desciptions = new ArrayList<>();
@@ -302,12 +304,22 @@ public class CveConstructor {
 	}
 	
 	private String xmlGregorianCalendarToDate(XMLGregorianCalendar urlDate) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		if(null == urlDate) {
-			return null;
-		}
-		Date date =  urlDate.toGregorianCalendar().getTime();
-		return df.format(date);
+	    if(null == urlDate) {
+            return null;
+        }
+		var utcTimeZone = TimeZone.getTimeZone("UTC");
+        DateFormat viDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        viDateFormat.setTimeZone(utcTimeZone);
+		var date =  urlDate.toGregorianCalendar().getTime();
+		return viDateFormat.format(date);
 	}
-
+	
+	private String formatDate(String date) {
+        if(null == date) {
+            return null;
+        }
+        var localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        return localDateTime.format(formatter);
+    }
 }
