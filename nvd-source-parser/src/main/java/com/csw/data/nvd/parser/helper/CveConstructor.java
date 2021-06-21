@@ -99,11 +99,11 @@ public class CveConstructor {
 			cvssv2.setCvssV2confidentialityImpact(baseMetricV2.getCvssV2().getConfidentialityImpact().value());
 			cvssv2.setCvssv2integrityImpact(baseMetricV2.getCvssV2().getIntegrityImpact().value());
 			cvssv2.setCvssV2availabilityImpact(baseMetricV2.getCvssV2().getAvailabilityImpact().value());
-			cvssv2.setCvssV2baseScore(String.valueOf(baseMetricV2.getCvssV2().getBaseScore()));
+			cvssv2.setCvssV2baseScore(convertToFloat(baseMetricV2.getCvssV2().getBaseScore()));
 			cvssv2.setBaseMetricV2severity(baseMetricV2.getSeverity());
 			cvssv2.setBaseMetricAcInsufInfo(String.valueOf(baseMetricV2.getAcInsufInfo()));
-			cvssv2.setBaseMetricV2exploitabilityScore(String.valueOf(baseMetricV2.getExploitabilityScore()));
-			cvssv2.setBaseMetricV2impactScore(String.valueOf(baseMetricV2.getImpactScore()));
+			cvssv2.setBaseMetricV2exploitabilityScore(convertToFloat(baseMetricV2.getExploitabilityScore()));
+			cvssv2.setBaseMetricV2impactScore(convertToFloat(baseMetricV2.getImpactScore()));
 			cvssv2.setUserInteractionRequired(getCvssv2UserInteraction(baseMetricV2.getUserInteractionRequired()));
 			vulnerability.setCvssv2(cvssv2);
 		}
@@ -121,10 +121,10 @@ public class CveConstructor {
 			cvssv3.setCvssV3confidentialityImpact(baseMetricV3.getCvssV3().getConfidentialityImpact().value());
 			cvssv3.setCvssV3integrityImpact(baseMetricV3.getCvssV3().getIntegrityImpact().value());
 			cvssv3.setCvssV3availabilityImpact(baseMetricV3.getCvssV3().getAvailabilityImpact().value());
-			cvssv3.setCvssV3baseScore(String.valueOf(baseMetricV3.getCvssV3().getBaseScore()));
+			cvssv3.setCvssV3baseScore(convertToFloat(baseMetricV3.getCvssV3().getBaseScore()));
 			cvssv3.setCvssV3baseSeverity(baseMetricV3.getCvssV3().getBaseSeverity().value());
-			cvssv3.setBaseMetricV3exploitabilityScore(String.valueOf(baseMetricV3.getExploitabilityScore()));
-			cvssv3.setBaseMetricV3impactScore(String.valueOf(baseMetricV3.getImpactScore()));
+			cvssv3.setBaseMetricV3exploitabilityScore(convertToFloat(baseMetricV3.getExploitabilityScore()));
+			cvssv3.setBaseMetricV3impactScore(convertToFloat(baseMetricV3.getImpactScore()));
 			vulnerability.setCvssv3(cvssv3);
 		}
 		
@@ -185,7 +185,15 @@ public class CveConstructor {
 		return vulnerability;
 	}
 
-	private String getCvssv2UserInteraction(Boolean userInteractionRequired) {
+	private Float convertToFloat(Double baseScore) {
+	    Float result = null;
+        if(null == baseScore) {
+            return result;
+        }
+        return baseScore.floatValue();
+    }
+
+    private String getCvssv2UserInteraction(Boolean userInteractionRequired) {
         if(null != userInteractionRequired) {
             if(userInteractionRequired) {
                 return "REQUIRED";
@@ -195,7 +203,7 @@ public class CveConstructor {
         return null;
     }
 
-    private String extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
+    private Integer extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
 	    Set<String> uniqueProductSet = new HashSet<>();
         for (AffectedSoftwareConfiguration affectedSoftwareConfiguration : affectedSoftwareConfigurations) {
             String vendor = affectedSoftwareConfiguration.getVendor();
@@ -203,7 +211,7 @@ public class CveConstructor {
             String uniqueVendorProduct = vendor.concat(product);
             uniqueProductSet.add(uniqueVendorProduct);
         }
-        return String.valueOf(uniqueProductSet.size());
+        return uniqueProductSet.size();
     }
 
     private VulnerabilityRiskScore constructVulnerabilityScore() {
@@ -221,8 +229,8 @@ public class CveConstructor {
 		configurationNumber = configurationNumber+1;
 			for (DefCpeMatch defCpeMatch : cpeMatchs) {
 				AffectedSoftwareConfiguration configuration = new AffectedSoftwareConfiguration();
-				configuration.setVulnerable(String.valueOf(defCpeMatch.getVulnerable()));
-				configuration.setRunningOnOrWith(String.valueOf(!defCpeMatch.getVulnerable()));
+				configuration.setVulnerable(defCpeMatch.getVulnerable());
+				configuration.setRunningOnOrWith(!defCpeMatch.getVulnerable());
 				configuration.setCpe23Uri(defCpeMatch.getCpe23Uri());
 				configuration.setTitle(defCpeMatch.getCpe23Uri());
 				configuration.setVendor(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 3));
