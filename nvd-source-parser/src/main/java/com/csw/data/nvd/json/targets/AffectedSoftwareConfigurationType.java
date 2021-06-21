@@ -5,29 +5,18 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class AffectedSoftwareConfigurationType {
 
 	@JsonProperty("affectedProductCount")
-	private String affectedProductCount;
+	private int affectedProductCount;
 
 	@JsonProperty("softwareConfigurations")
 	private List<AffectedSoftwareConfiguration> softwareConfigurations;
 	
-	public String getAffectedProductCount() {
-		return affectedProductCount;
-	}
-
-	public void setAffectedProductCount(String affectedProductCount) {
-		this.affectedProductCount = affectedProductCount;
-	}
-
-	public List<AffectedSoftwareConfiguration> getSoftwareConfigurations() {
-		return softwareConfigurations;
-	}
-
-	public void setSoftwareConfigurations(List<AffectedSoftwareConfiguration> softwareConfigurations) {
-		this.softwareConfigurations = softwareConfigurations;
-	}
-
 }

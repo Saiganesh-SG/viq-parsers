@@ -50,15 +50,15 @@ public class Cvssv2 {
     @JsonProperty("availabilityImpact")
     private String cvssV2availabilityImpact;
     @JsonProperty("score")
-    private String cvssV2baseScore;
+    private float cvssV2baseScore;
     @JsonProperty("severity")
     private String baseMetricV2severity;
     @JsonProperty("baseMetricAcInsufInfo")
     private String baseMetricAcInsufInfo;
     @JsonProperty("exploitabilityScore")
-    private String baseMetricV2exploitabilityScore;
+    private float baseMetricV2exploitabilityScore;
     @JsonProperty("impactScore")
-    private String baseMetricV2impactScore;
+    private float baseMetricV2impactScore;
     @JsonProperty("userInteraction")
     private String userInteractionRequired;
     @JsonIgnore

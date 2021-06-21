@@ -10,6 +10,6 @@ import lombok.Setter;
 public class Summary {
 	
     @JsonProperty("vulnerabilitiesCount")
-	private String vulnerabilitiesCount;
+	private int vulnerabilitiesCount;
 
 }
