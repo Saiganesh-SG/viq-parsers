@@ -239,7 +239,7 @@ public class CveConstructor {
 
 	private String getDetailsFromUri(String cpe23Uri, int index) {
 		String[] tokens = cpe23Uri.split(":");
-		return tokens[index].replace("_", " ");
+		return tokens[index];
 	}
 
 	private List<VendorComment> extractVendorCommentByCve(Map<String, List<VendorComment>> vendorComments, String cveId) {

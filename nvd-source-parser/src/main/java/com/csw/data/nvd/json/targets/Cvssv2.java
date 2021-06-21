@@ -15,7 +15,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
     "version",
-    "vectorString",
+    "vector",
     "accessVector",
     "accessComplexity",
     "authentication",
@@ -35,7 +35,7 @@ public class Cvssv2 {
 
     @JsonProperty("version")
     private String cvssV2version;
-    @JsonProperty("vectorString")
+    @JsonProperty("vector")
     private String cvssV2vectorString;
     @JsonProperty("accessVector")
     private String cvssV2accessVector;
