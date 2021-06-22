@@ -26,9 +26,6 @@ public class CpeLiveKeepServiceImpl implements LiveKeepService<DefCpeMatch> {
     public JSONArray writeFileToLiveKeep(List<DefCpeMatch> defCpeMatchs, String cpeLocalDirectory, Map<String, Integer> recordStats) {
         var kafkaMessages = new JSONArray();
         for (DefCpeMatch defCpeMatch : defCpeMatchs) {
-            if(!defCpeMatch.getCpe23Uri().equalsIgnoreCase("cpe:2.3:h:intel:core_i7:8850h:*:*:*:*:*:*:*")) {
-                continue;
-            }
             JSONObject message = createKafkaMessage(defCpeMatch.getCpe23Uri(), defCpeMatch, ParseType.CPE);
             kafkaMessages.put(message);
         }
