@@ -178,6 +178,7 @@ public class LivekeepServiceImpl implements LivekeepService {
                 PutObjectRequest metaFileRequest = PutObjectRequest.builder().bucket(s3BucketName).key(metaFileObjectKey).build();
                 s3Client.putObject(metaFileRequest, metaFile);
             }
+            cweFile = objectKey;
         }
         
         // create and return the kafka message
@@ -227,7 +228,7 @@ public class LivekeepServiceImpl implements LivekeepService {
      */
     private Object createFileUri(String objectKey, String systemType) {
         if ("s3".equalsIgnoreCase(systemType)) {
-            return new StringBuilder().append("s3:/").append(objectKey).toString();
+            return new StringBuilder().append("s3://").append(s3BucketName).append("/").append(objectKey).toString();
         }
         else {
             return new StringBuilder().append("file:///").append(objectKey).toString();
