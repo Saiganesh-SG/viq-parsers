@@ -105,15 +105,17 @@ public class LiveKeepServiceImpl implements LiveKeepService<Vulnerability> {
 	private JSONObject writeJsonAndMessage(String file, String id, String cveLocalDirectory) {
 		String fileSystemType = localFlag ? "file" : "s3";
 		LOGGER.debug("fileSystemType : {}", fileSystemType);
+		
+		//generate meta json file
+        generateMetaFile(file, cveLocalDirectory);
+        
 		//write file to s3
 		if("s3".equalsIgnoreCase(fileSystemType)) {
 			String objectKey = s3cveBasePath + "nvd/" + id + ParserConstants.JSON_FILE_EXTENSION;
 			PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
 			s3Client.putObject(request, Paths.get(file));
+			file = objectKey;
 		}
-		
-		//generate meta json file
-		generateMetaFile(file, cveLocalDirectory);
 		
 		//create and return the kafka message
 		return createKafkaMessage(id, file, ParserConstants.CVE, fileSystemType);
@@ -148,7 +150,7 @@ public class LiveKeepServiceImpl implements LiveKeepService<Vulnerability> {
 	
 	private Object createFileUri(String objectKey, String systemType) {
 		if("s3".equalsIgnoreCase(systemType)) {
-			return new StringBuilder().append("s3:/").append(objectKey).toString();
+			return new StringBuilder().append("s3://").append(s3BucketName).append("/").append(objectKey).toString();
 		}
 		else {
 			return new StringBuilder().append("file:///").append(objectKey).toString();
