@@ -4,11 +4,11 @@ ENV ENVIRONMENT dev
 ENV LATEST_FLAG false
 ENV TOPIC_NAME cwe
 
-# Create folders for interim storage based on bucket-name
-RUN mkdir -p /app/csw-${ENVIRONMENT}-dp/sourcekeep/cwe/mitre && mkdir -p /app/csw-${ENVIRONMENT}-dp/livekeep/cwe/mitre && mkdir -p /app/csw-${ENVIRONMENT}-dp/sourcekeep/cve/nvd && mkdir -p /app/csw-${ENVIRONMENT}-dp/livekeep/cve/nvd && mkdir -p /app/csw-${ENVIRONMENT}-dp/sourcekeep/product/nvd && mkdir -p /app/csw-${ENVIRONMENT}-dp/livekeep/product/nvd && mkdir -p /app/certs
+# bash shell
+RUN apk update && apk upgrade && apk add bash
 
-# Code has reference to /csw-dev-dp .. so creating symlink for backward comptability until code is updated
-RUN cd / && ln -s /app/csw-${ENVIRONMENT}-dp csw-${ENVIRONMENT}-dp && ln -s /app/certs certs
+# Create folders for interim storage
+RUN bash -c 'mkdir -p /app/csw-{dev,qa,uat,prod}-dp/{sourcekeep,livekeep}/{cwe,cve}/{nvd,mitre} && mkdir -p /app/certs'
 
 # Copy the cert
 RUN cp /usr/lib/jvm/default-jvm/jre/lib/security/cacerts /app/certs/kafka.client.truststore.jks
