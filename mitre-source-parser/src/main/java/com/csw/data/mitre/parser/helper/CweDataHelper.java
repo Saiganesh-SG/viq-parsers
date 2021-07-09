@@ -1,11 +1,15 @@
 package com.csw.data.mitre.parser.helper;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -628,11 +632,10 @@ public class CweDataHelper {
 		}
 		for(PreviousEntryName previousEntryName: previousEntryNameList) {
 			PreviousEntryNameType previousEntryNameType = new PreviousEntryNameType();
-			Date submissionDate = xmlGregorianCalendarToDate(previousEntryName.getDate());
-			SimpleDateFormat dateFormat = new SimpleDateFormat(ParserConstants.DEFAULT_DATE_FORMAT);
+			String submissionDate = xmlGregorianCalendarToDateString(previousEntryName.getDate());
 
 			previousEntryNameType.setName(previousEntryName.getValue());
-			previousEntryNameType.setSubmissionDate(dateFormat.format(submissionDate));
+			previousEntryNameType.setSubmissionDate(submissionDate);
 			previousEntryNames.add(previousEntryNameType);
 		}
 		return previousEntryNames;
@@ -651,13 +654,12 @@ public class CweDataHelper {
 		}
 		for(Contribution contribution: contributions) {
 			ContributionType contributionType = new ContributionType();
-			Date modificationDate = xmlGregorianCalendarToDate(contribution.getContributionDate());
-			SimpleDateFormat dateFormat = new SimpleDateFormat(ParserConstants.DEFAULT_DATE_FORMAT);
+			String modificationDate = xmlGregorianCalendarToDateString(contribution.getContributionDate());
 
 			contributionType.setType(contribution.getType());
 			contributionType.setContributionName(contribution.getContributionName());
 			contributionType.setContributionOrganization(contribution.getContributionOrganization());
-			contributionType.setContributionDate(dateFormat.format(modificationDate));
+			contributionType.setContributionDate(modificationDate);
 			contributionType.setContributionComment(contribution.getContributionComment());
 			contributionTypes.add(contributionType);
 		}
@@ -678,15 +680,14 @@ public class CweDataHelper {
 		}
 		for(Modification modification: modifications) {
 			ModificationType modificationType = new ModificationType();
-			Date modificationDate = xmlGregorianCalendarToDate(modification.getModificationDate());
-			SimpleDateFormat dateFormat = new SimpleDateFormat(ParserConstants.DEFAULT_DATE_FORMAT);
+			String modificationDate = xmlGregorianCalendarToDateString(modification.getModificationDate());
 
 			modificationType.setModificationName(modification.getModificationName());
 			modificationType.setModificationOrganization(modification.getModificationOrganization());
-			modificationType.setModificationDate(dateFormat.format(modificationDate));
+			modificationType.setModificationDate(modificationDate);
 			modificationType.setModificationImportance(null != modification.getModificationImportance() ? modification.getModificationImportance().value() : null);
 			modificationType.setModificationComment(modification.getModificationComment());
-			weakness.setLastUpdatedDate(dateFormat.format(modificationDate));
+			weakness.setLastUpdatedDate(modificationDate);
 			modificationTypes.add(modificationType);
 		}
 		return modificationTypes;
@@ -704,14 +705,13 @@ public class CweDataHelper {
 			return null;
 		}
 		SubmissionRoot submissionRoot = new SubmissionRoot();
-		Date submissionDate = xmlGregorianCalendarToDate(submission.getSubmissionDate());
-		SimpleDateFormat dateFormat = new SimpleDateFormat(ParserConstants.DEFAULT_DATE_FORMAT);
+		String submissionDate = xmlGregorianCalendarToDateString(submission.getSubmissionDate());
 
 		submissionRoot.setSubmissionName(submission.getSubmissionName());
 		submissionRoot.setSubmissionOrganization(submission.getSubmissionOrganization());
-		submissionRoot.setSubmissionDate(dateFormat.format(submissionDate));
+		submissionRoot.setSubmissionDate(submissionDate);
 		submissionRoot.setSubmissionComment(submission.getSubmissionComment());
-		weakness.setSubmissionDate(dateFormat.format(submissionDate));
+		weakness.setSubmissionDate(submissionDate);
 		return submissionRoot;
 	}
 
@@ -867,4 +867,24 @@ public class CweDataHelper {
 		data.setAbstraction(abstraction);
 		return data;
 	}
+	
+	private String xmlGregorianCalendarToDateString(XMLGregorianCalendar urlDate) {
+        if(null == urlDate) {
+            return null;
+        }
+        var utcTimeZone = TimeZone.getTimeZone("UTC");
+        DateFormat viDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        viDateFormat.setTimeZone(utcTimeZone);
+        var date =  urlDate.toGregorianCalendar().getTime();
+        return viDateFormat.format(date);
+    }
+	
+	private String formatDate(String date) {
+        if(null == date) {
+            return null;
+        }
+        var localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        return localDateTime.format(formatter);
+    }
 }

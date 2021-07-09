@@ -42,6 +42,6 @@ public final class ParserConstants {
     public static final String HTML_FILE_EXTENSION = ".html";
     
     /** The Constant DEFAULT_DATE_FORMAT. */
-    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
 }
