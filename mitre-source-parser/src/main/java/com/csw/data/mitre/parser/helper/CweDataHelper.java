@@ -878,13 +878,4 @@ public class CweDataHelper {
         var date =  urlDate.toGregorianCalendar().getTime();
         return viDateFormat.format(date);
     }
-	
-	private String formatDate(String date) {
-        if(null == date) {
-            return null;
-        }
-        var localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
-        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return localDateTime.format(formatter);
-    }
 }
