@@ -6,11 +6,12 @@ import java.util.Map;
 
 import org.json.JSONArray;
 
-import com.csw.data.nvd.json.cpe.source.DefCpeMatch;
-import com.csw.data.nvd.json.targets.Vulnerability;
+import com.csw.data.nvd.json.cpedictionary.target.CpeDictionary;
 
 public interface LiveKeepService<T> {
 
 	JSONArray writeFileToLiveKeep(List<T> vulnerabilities, String cveLocalDirectory, Map<String, Integer> recordStats) throws IOException;
+
+    JSONArray writeCpeDictionaryFileToKafka(List<CpeDictionary> cpeDictionaryList, Object object, Map<String, Integer> recordStats);
 
 }
