@@ -36,7 +36,6 @@ public class CpeDictionaryProcessor implements TopicProcessor<CpeDictionary> {
 
     @Override
     public List<CpeDictionary> unmarshallObjectFromSourceFile(String sourceFilePath) {
-        sourceFilePath = "C:\\Users\\viswamr\\Desktop\\cpe_dictionary_truncated.xml";
         var sourceFile = new File(sourceFilePath);
         if (!sourceFile.exists()) {
             LOGGER.error("The source file does not exist : {}", sourceFilePath);
