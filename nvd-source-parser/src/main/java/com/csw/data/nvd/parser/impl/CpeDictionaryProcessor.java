@@ -36,6 +36,7 @@ public class CpeDictionaryProcessor implements TopicProcessor<CpeDictionary> {
 
     @Override
     public List<CpeDictionary> unmarshallObjectFromSourceFile(String sourceFilePath) {
+        sourceFilePath = "C:\\Users\\viswamr\\Desktop\\cpe_dictionary_truncated.xml";
         var sourceFile = new File(sourceFilePath);
         if (!sourceFile.exists()) {
             LOGGER.error("The source file does not exist : {}", sourceFilePath);
@@ -237,6 +238,7 @@ public class CpeDictionaryProcessor implements TopicProcessor<CpeDictionary> {
     private static String escapeCpeUri(String cpeUri) {
         cpeUri = cpeUri.replace("\\@", "@");
         cpeUri = cpeUri.replace("\\/", "/");
+        cpeUri = cpeUri.replace("cpe:/", "cpe:");
         cpeUri = cpeUri.replace("*", "");
         return cpeUri;
     }
