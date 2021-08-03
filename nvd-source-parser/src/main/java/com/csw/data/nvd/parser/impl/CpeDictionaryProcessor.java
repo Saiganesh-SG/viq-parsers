@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.csw.data.nvd.json.cpedictionary.target.Cpe22;
-import com.csw.data.nvd.json.cpedictionary.target.Cpe23;
-import com.csw.data.nvd.json.cpedictionary.target.CpeDictionary;
-import com.csw.data.nvd.json.cpedictionary.target.Reference;
+import com.csw.data.nvd.json.cpedictionary.targets.Cpe22;
+import com.csw.data.nvd.json.cpedictionary.targets.Cpe23;
+import com.csw.data.nvd.json.cpedictionary.targets.CpeDictionary;
+import com.csw.data.nvd.json.cpedictionary.targets.Reference;
 import com.csw.data.nvd.parser.TopicProcessor;
 
 @Service

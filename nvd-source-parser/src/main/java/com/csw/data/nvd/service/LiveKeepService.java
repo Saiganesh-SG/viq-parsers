@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.json.JSONArray;
 
-import com.csw.data.nvd.json.cpedictionary.target.CpeDictionary;
+import com.csw.data.nvd.json.cpedictionary.targets.CpeDictionary;
 
 public interface LiveKeepService<T> {
 

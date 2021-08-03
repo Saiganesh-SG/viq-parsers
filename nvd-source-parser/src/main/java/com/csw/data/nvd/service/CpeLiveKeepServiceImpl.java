@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.csw.data.nvd.config.ParseType;
 import com.csw.data.nvd.json.cpe.source.DefCpeMatch;
-import com.csw.data.nvd.json.cpedictionary.target.CpeDictionary;
+import com.csw.data.nvd.json.cpedictionary.targets.CpeDictionary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
