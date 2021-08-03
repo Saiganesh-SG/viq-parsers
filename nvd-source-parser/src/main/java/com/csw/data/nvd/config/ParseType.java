@@ -3,9 +3,9 @@ package com.csw.data.nvd.config;
 import com.csw.data.nvd.exception.InvalidParameterException;
 
 public enum ParseType {
-	CVE("cve"), CPE("cpe"), COMMENT("comment");
+	CVE("cve"), CPE("cpe"), COMMENT("comment"), CPE_DICTIONARY("cpe_dictionary");
 	
-	private static final String INVALID_PARSE_TYPE = "Invalid parse type. The parse type should be any of the one (CVE, CPE)";
+	private static final String INVALID_PARSE_TYPE = "Invalid parse type. The parse type should be any of the one (CVE, CPE, CPE DICTIONARY)";
 
 	private final String type;
 

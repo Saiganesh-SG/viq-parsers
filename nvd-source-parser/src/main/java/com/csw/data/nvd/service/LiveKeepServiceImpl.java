@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.csw.data.nvd.json.cpedictionary.targets.CpeDictionary;
 import com.csw.data.nvd.json.targets.Vulnerability;
 import com.csw.data.util.HashingUtil;
 import com.csw.data.util.ParserConstants;
@@ -156,5 +157,10 @@ public class LiveKeepServiceImpl implements LiveKeepService<Vulnerability> {
 			return new StringBuilder().append("file:///").append(objectKey).toString();
 		}
 	}
+
+    @Override
+    public JSONArray writeCpeDictionaryFileToKafka(List<CpeDictionary> cpeDictionaryList, Object object, Map<String, Integer> recordStats) {
+        return null;
+    }
 
 }

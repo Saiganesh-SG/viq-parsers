@@ -39,6 +39,10 @@ public class NvdTopicParserImpl implements NvdTopicParser {
 		    commonVulnerabilityExtractor.parseCpe();
 			break;
 			
+		case "cpe_dictionary":
+            commonVulnerabilityExtractor.parseCpeDictionary();
+            break;
+			
 		default:
 			break;
 		}
