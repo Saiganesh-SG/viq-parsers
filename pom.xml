@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.csw.data</groupId>
 	<artifactId>source-parser</artifactId>
-	<version>21.7.1-SNAPSHOT</version>
+	<version>21.8.20.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<properties>
