@@ -11,16 +11,7 @@ public class AmazonS3Client {
 
 	@Bean
 	public S3Client buildAmazonS3Client() {
-		return S3Client.builder().region(Region.US_EAST_1).build();
+		return S3Client.builder().region(Region.US_WEST_2).build();
 	}
 	
-	public static void main(String[] args) {
-		int ab = -1234;
-		String aa = Integer.toString(ab);
-		char[] aaa = aa.toCharArray();
-		for (char c : aaa) {
-			System.out.println(c);
-		}
-	}
-
 }
