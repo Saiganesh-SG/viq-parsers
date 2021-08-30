@@ -8,7 +8,7 @@ ENV TOPIC_NAME cwe
 RUN apk update && apk upgrade && apk add bash
 
 # Create folders for interim storage
-RUN bash -c 'mkdir -p /app/csw-{dev,qa,uat,prod}-dp/{sourcekeep,livekeep}/{cwe,cve}/{nvd,mitre} && mkdir -p /app/certs'
+RUN bash -c 'mkdir -p /app/securin-{dev,qa,uat,prod}-vi/{sourcekeep,livekeep}/{cwe,cve}/{nvd,mitre} && mkdir -p /app/certs'
 
 # Copy the cert
 RUN cp /usr/lib/jvm/default-jvm/jre/lib/security/cacerts /app/certs/kafka.client.truststore.jks
