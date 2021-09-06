@@ -216,10 +216,10 @@ public class CveConstructor {
 
     private VulnerabilityRiskScore constructVulnerabilityScore() {
 	    VulnerabilityRiskScore riskScore = new VulnerabilityRiskScore();
-	    riskScore.setScore("null");
-	    riskScore.setSeverity("null");
-	    riskScore.setVersion("null");
-	    riskScore.setLastUpdatedDate("null");
+	    riskScore.setScore(null);
+	    riskScore.setSeverity(null);
+	    riskScore.setVersion(null);
+	    riskScore.setLastUpdatedDate(null);
 	    riskScore.setReasonForChange(new ArrayList<String>(1));
         return riskScore;
     }
