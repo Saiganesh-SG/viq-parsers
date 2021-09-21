@@ -204,14 +204,13 @@ public class CveConstructor {
     }
 
     private Integer extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
-	    Set<String> uniqueProductSet = new HashSet<>();
+		int counter = 0;
         for (AffectedSoftwareConfiguration affectedSoftwareConfiguration : affectedSoftwareConfigurations) {
-            String vendor = affectedSoftwareConfiguration.getVendor();
-            String product = affectedSoftwareConfiguration.getProduct();
-            String uniqueVendorProduct = vendor.concat(product);
-            uniqueProductSet.add(uniqueVendorProduct);
+            if(!affectedSoftwareConfiguration.isRunningOnOrWith()) {
+            	counter++;
+			}
         }
-        return uniqueProductSet.size();
+        return counter;
     }
 
     private VulnerabilityRiskScore constructVulnerabilityScore() {
