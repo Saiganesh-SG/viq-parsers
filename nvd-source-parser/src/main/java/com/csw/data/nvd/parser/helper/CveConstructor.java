@@ -204,22 +204,21 @@ public class CveConstructor {
     }
 
     private Integer extractAffectedProductCount(List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations) {
-	    Set<String> uniqueProductSet = new HashSet<>();
+		int counter = 0;
         for (AffectedSoftwareConfiguration affectedSoftwareConfiguration : affectedSoftwareConfigurations) {
-            String vendor = affectedSoftwareConfiguration.getVendor();
-            String product = affectedSoftwareConfiguration.getProduct();
-            String uniqueVendorProduct = vendor.concat(product);
-            uniqueProductSet.add(uniqueVendorProduct);
+            if(!affectedSoftwareConfiguration.isRunningOnOrWith()) {
+            	counter++;
+			}
         }
-        return uniqueProductSet.size();
+        return counter;
     }
 
     private VulnerabilityRiskScore constructVulnerabilityScore() {
 	    VulnerabilityRiskScore riskScore = new VulnerabilityRiskScore();
-	    riskScore.setScore("null");
-	    riskScore.setSeverity("null");
-	    riskScore.setVersion("null");
-	    riskScore.setLastUpdatedDate("null");
+	    riskScore.setScore(null);
+	    riskScore.setSeverity(null);
+	    riskScore.setVersion(null);
+	    riskScore.setLastUpdatedDate(null);
 	    riskScore.setReasonForChange(new ArrayList<String>(1));
         return riskScore;
     }
