@@ -129,16 +129,18 @@ public class CveConstructor {
 		}
 		
 		List<CweList> cweLists = new ArrayList<>();
+		Set<String> cweIds = new HashSet<>();
 		List<ProblemtypeDatum> problemtypeDatums = cveItem.getCve().getProblemtype().getProblemtypeData();
 		for (ProblemtypeDatum problemtypeDatum : problemtypeDatums) {
 			List<LangString> langStrings = problemtypeDatum.getDescription();
 			for (LangString langString : langStrings) {
-				if(null == langString.getValue() || !langString.getValue().startsWith("CWE-")) {
+				if(null == langString.getValue() || !langString.getValue().startsWith("CWE-") || cweIds.contains(langString.getValue())) {
 					continue;
 				}
 				CweList cweList = new CweList();
 				cweList.setId(langString.getValue());
 				cweLists.add(cweList);
+				cweIds.add(langString.getValue());
 			}
 		}
 		vulnerability.setCweList(cweLists);
