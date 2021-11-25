@@ -430,6 +430,9 @@ public class CweDataHelper {
 			ContentHistoryRoot contentHistory = addContentHistory(weaknessType.getContentHistory(), weakness);
 			weakness.setContentHistory(contentHistory);
 		}
+		
+		weakness.setTaxonomies(new ArrayList<>());
+		
 		return weakness;
 	}
 

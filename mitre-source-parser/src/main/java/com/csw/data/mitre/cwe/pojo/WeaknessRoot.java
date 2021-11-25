@@ -1,15 +1,21 @@
-
 package com.csw.data.mitre.cwe.pojo;
-
-import com.fasterxml.jackson.annotation.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**
@@ -28,6 +34,7 @@ import java.util.Set;
     "viewType",
     "description",
     "extendedDescription",
+    "vrs",
     "relatedWeaknesses",
     "weaknessOrdinalities",
     "applicablePlatforms",
@@ -43,11 +50,14 @@ import java.util.Set;
     "objective",
     "audience",
     "taxonomyMappings",
+    "taxonomies",
     "notes",
     "filter",
     "references",
     "contentHistory",
-    "summary"
+    "summary",
+    "viCreatedDate",
+    "viUpdatedDate"
 })
 @Getter
 @Setter
@@ -61,7 +71,7 @@ public class WeaknessRoot {
     private String weaknessType;
 
     @JsonProperty("sources")
-    private List<Source> sources = new ArrayList<Source>();
+    private List<Source> sources = new ArrayList<>();
     /**
      * The CWE title attribute
      * <p>
@@ -100,6 +110,8 @@ public class WeaknessRoot {
     @JsonProperty("structure")
     @JsonPropertyDescription("The Structure lists the different structural natures of a weakness. A Simple structure represents a single weakness whose exploitation is not dependent on the presence of another weakness. A Composite is a set of weaknesses that must all be present simultaneously in order to produce an exploitable vulnerability, while a Chain is a set of weaknesses that must be reachable consecutively in order to produce an exploitable vulnerability.")
     private WeaknessRoot.Structure structure;
+    @JsonProperty("vrs")
+    private WeaknessRiskScore weaknessRiskScore;
     @JsonProperty("viewType")
     private WeaknessRoot.ViewType viewType;
     @JsonProperty("description")
@@ -136,6 +148,8 @@ public class WeaknessRoot {
     private List<AudienceType> audience = new ArrayList<>();
     @JsonProperty("taxonomyMappings")
     private List<TaxonomyMapping> taxonomyMappings = new ArrayList<>();
+    @JsonProperty("taxonomies")
+    private List<Taxonomy> taxonomies;
     @JsonProperty("notes")
     private List<NoteType> notes = new ArrayList<>();
     @JsonProperty("filter")
@@ -150,6 +164,13 @@ public class WeaknessRoot {
     private Summary summary;
     private String lastUpdatedDate;
     private String submissionDate;
+    @JsonProperty("viCreatedDate")
+    private String viCreatedDate;
+    @JsonProperty("viUpdatedDate") 
+    private String viUpdatedDate;
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new HashMap<>();
+
 
     /**
      * The CWE Abstraction attribute
@@ -165,7 +186,7 @@ public class WeaknessRoot {
         VARIANT("Variant"),
         COMPOUND("Compound");
         private final String value;
-        private final static Map<String, WeaknessRoot.Abstraction> CONSTANTS = new HashMap<String, WeaknessRoot.Abstraction>();
+        private static final Map<String, WeaknessRoot.Abstraction> CONSTANTS = new HashMap<>();
 
         static {
             for (WeaknessRoot.Abstraction c: values()) {
@@ -215,7 +236,7 @@ public class WeaknessRoot {
         STABLE("Stable"),
         USABLE("Usable");
         private final String value;
-        private final static Map<String, WeaknessRoot.Status> CONSTANTS = new HashMap<String, WeaknessRoot.Status>();
+        private static final Map<String, WeaknessRoot.Status> CONSTANTS = new HashMap<>();
 
         static {
             for (WeaknessRoot.Status c: values()) {
@@ -262,7 +283,7 @@ public class WeaknessRoot {
         COMPOSITE("Composite"),
         SIMPLE("Simple");
         private final String value;
-        private final static Map<String, WeaknessRoot.Structure> CONSTANTS = new HashMap<String, WeaknessRoot.Structure>();
+        private static final Map<String, WeaknessRoot.Structure> CONSTANTS = new HashMap<>();
 
         static {
             for (WeaknessRoot.Structure c: values()) {
@@ -302,7 +323,7 @@ public class WeaknessRoot {
         EXPLICIT("Explicit"),
         GRAPH("Graph");
         private final String value;
-        private final static Map<String, WeaknessRoot.ViewType> CONSTANTS = new HashMap<String, WeaknessRoot.ViewType>();
+        private static final Map<String, WeaknessRoot.ViewType> CONSTANTS = new HashMap<>();
 
         static {
             for (WeaknessRoot.ViewType c: values()) {
