@@ -1,5 +1,6 @@
 package com.csw.data.mitre.cwe.pojo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
@@ -12,5 +13,5 @@ public class Taxonomy {
 	private Integer year;
 	private String source;
 	private Integer rank;
-	private List<OwaspVulnerability> vulnerabilities;
+	private List<OwaspVulnerability> vulnerabilities = new ArrayList<>();
 }

@@ -149,7 +149,7 @@ public class WeaknessRoot {
     @JsonProperty("taxonomyMappings")
     private List<TaxonomyMapping> taxonomyMappings = new ArrayList<>();
     @JsonProperty("taxonomies")
-    private List<Taxonomy> taxonomies;
+    private List<Taxonomy> taxonomies = new ArrayList<>();
     @JsonProperty("notes")
     private List<NoteType> notes = new ArrayList<>();
     @JsonProperty("filter")
