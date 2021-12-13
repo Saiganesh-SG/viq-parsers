@@ -19,4 +19,4 @@ COPY nvd-source-parser/target/nvd-source-parser*.jar /app/nvd-parser.jar
 WORKDIR /app
 
 # java -jar -Dtopic=cve -Dlatest=true nvd-parser.jar
-ENTRYPOINT ["java","-jar","-Dtopic=${TOPIC_NAME}","-Dlatest=${LATEST_FLAG}"]
+ENTRYPOINT ["java","-Dlog4j2.formatMsgNoLookups=true","-jar","-Dtopic=${TOPIC_NAME}","-Dlatest=${LATEST_FLAG}"]
