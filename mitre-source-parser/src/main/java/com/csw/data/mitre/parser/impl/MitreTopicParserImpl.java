@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.csw.data.mitre.parser.MitreTopicParser;
+import com.csw.data.mitre.parser.VulnerabilityParser;
 import com.csw.data.mitre.parser.WeaknessParser;
 
 /**
@@ -22,6 +23,9 @@ public class MitreTopicParserImpl implements MitreTopicParser {
 	/** The weakness parser. */
 	@Autowired
 	private WeaknessParser weaknessParser;
+	
+	@Autowired
+	private VulnerabilityParser vulnerabilityParser;
 
 	/**
 	 * Parses the topic type.
@@ -38,7 +42,8 @@ public class MitreTopicParserImpl implements MitreTopicParser {
 			break;
 			
 		case "cve":
-			LOGGER.debug("Started Parsing CPE");
+			LOGGER.info("Started Parsing CVE from Mitre");
+			vulnerabilityParser.parseVulnerabilityFiles();
 			break;
 			
 		default:
