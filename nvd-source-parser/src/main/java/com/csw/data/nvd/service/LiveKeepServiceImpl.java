@@ -143,6 +143,7 @@ public class LiveKeepServiceImpl implements LiveKeepService<Vulnerability> {
 			message.put("id", id);
 			message.put("uri", createFileUri(objectKey, systemType));
 			message.put("fileType", fileType);
+			message.put("source", "NVD");
 		} catch (JSONException e) {
 		    LOGGER.error("JSONException while creating kafka message file : {}", e.getMessage());
 		}

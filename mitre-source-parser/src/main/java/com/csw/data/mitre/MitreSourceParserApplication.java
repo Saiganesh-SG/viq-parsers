@@ -21,7 +21,6 @@ public class MitreSourceParserApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		LOGGER.info("started the Mitre parsing...");
 		String topicType = System.getProperty("topic");
-		topicType = "cwe";
 		if (null != topicType) {
 			mitreTopicParser.parseTopicType(topicType);
 		} else {
