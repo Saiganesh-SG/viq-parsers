@@ -5,8 +5,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -49,9 +47,6 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 	@Value("${sourcekeep.cve.mitre.path}")
 	private String sourcekeepDirectory;
 	
-	@Value("${temp.sourcekeep.cve.mitre.path}")
-	private String tempSourceDirectory;
-	
 	@Value("${livekeep.cve.mitre.path}")
 	private String livekeepDirectory;
 	
@@ -74,26 +69,24 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 
 		//Downloading zip file from Github link
 		LOGGER.info("Source file download started");
-		cveDataHelper.downloadSourceFile(downloadURL, tempSourceDirectory+"cvelist-master.zip", tempSourceDirectory);
+		cveDataHelper.downloadSourceFile(downloadURL, sourcekeepDirectory+"cvelist-master.zip", sourcekeepDirectory);
 		LOGGER.info("Source file download completed");
 
 		//Extracting the zip file
 		LOGGER.info("Source extraction started");
-		cveDataHelper.extractSourceFile(tempSourceDirectory+"cvelist-master.zip",tempSourceDirectory);
+		cveDataHelper.extractSourceFile(sourcekeepDirectory+"cvelist-master.zip",sourcekeepDirectory);
 		LOGGER.info("Source extraction completed");
 
 		ObjectMapper mapper = new ObjectMapper();
 		
 		//Create a list of file consisting all the source files
 		List<File> sourceCveFiles = new ArrayList<>();
-		cveDataHelper.getSourceFiles(tempSourceDirectory, sourceCveFiles);
+		cveDataHelper.getSourceFiles(sourcekeepDirectory, sourceCveFiles);
 		LOGGER.info("Total count of files = {}", sourceCveFiles.size());
 
 		//Writing the source files to S3 sourcekeep bucket
 		LOGGER.info("Sourcekeep File writing to S3 started");
 		for(File file: sourceCveFiles) {
-			
-			FileUtils.copyFileToDirectory(file, new File(sourcekeepDirectory));
 			
             String objectKey = sourceCveS3Path + file.getName();
             PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
@@ -107,7 +100,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		
 		//Getting the modified source files
 		List<File> modifiedFiles = new ArrayList<>();
-		cveDataHelper.getSourceFiles(tempSourceDirectory+"cvelist-master/", modifiedFiles);
+		cveDataHelper.getSourceFiles(sourcekeepDirectory, modifiedFiles);
 		
 		//Create livekeep directory if it does not exists
 		File livekeepFile = new File(livekeepDirectory);

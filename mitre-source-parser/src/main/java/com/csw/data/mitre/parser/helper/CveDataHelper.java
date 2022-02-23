@@ -1,6 +1,7 @@
 package com.csw.data.mitre.parser.helper;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -101,31 +102,41 @@ public class CveDataHelper {
 	
 	//Method to extract a zip file
 	public void extractSourceFile(String sourceZipFile, String destinationPath) throws IOException {
+		
+		File destinationDirectory = new File(destinationPath);
+		if(!destinationDirectory.exists())
+			destinationDirectory.mkdirs();
 
-		File destDir = new File(destinationPath);
+		int buffer = 2048;
+		File file = new File(sourceZipFile);
+		ZipFile zip = new ZipFile(file);
 
-		try (ZipFile file = new ZipFile(sourceZipFile)) {
-			Enumeration zipEntries = file.entries();
-			while (zipEntries.hasMoreElements()) {
-				ZipEntry zipEntry = (ZipEntry) zipEntries.nextElement();
-				if (zipEntry.isDirectory()) {
-					String subDir = destDir + "\\" + zipEntry.getName();
-					File as = new File(subDir);
-					as.mkdirs();
-				} else {
-					File newFile = new File(destDir, zipEntry.getName());
-					String extractedDirectoryPath = destDir.getCanonicalPath();
-					String extractedFilePath = newFile.getCanonicalPath();
-					if (!extractedFilePath.startsWith(extractedDirectoryPath + File.separator)) {
-						throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-					}
-					BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream(zipEntry));
-					try (FileOutputStream outputStream = new FileOutputStream(newFile)) {
-						while (inputStream.available() > 0) {
-							outputStream.write(inputStream.read());
-						}
-					}
+		new File(destinationPath).mkdir();
+		Enumeration zipFileEntries = zip.entries();
+
+		while (zipFileEntries.hasMoreElements()) {
+			
+			ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+			String currentEntry = entry.getName();
+
+			File destFile = new File(destinationPath, currentEntry);
+			destFile = new File(destinationPath, destFile.getName());
+			File destinationParent = destFile.getParentFile();
+			destinationParent.mkdirs();
+			if (!entry.isDirectory()) {
+				BufferedInputStream is = new BufferedInputStream(zip.getInputStream(entry));
+				int currentByte;
+				byte[] data = new byte[buffer];
+
+				FileOutputStream fos = new FileOutputStream(destFile);
+				BufferedOutputStream dest = new BufferedOutputStream(fos, buffer);
+
+				while ((currentByte = is.read(data, 0, buffer)) != -1) {
+					dest.write(data, 0, currentByte);
 				}
+				dest.flush();
+				dest.close();
+				is.close();
 			}
 		}
 	}
