@@ -23,7 +23,6 @@ import com.csw.data.mitre.cve.pojo.VulnerabilitySourceRoot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -75,12 +74,12 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 
 		//Downloading zip file from Github link
 		LOGGER.info("Source file download started");
-		cveDataHelper.downloadSourceFile(downloadURL, tempSourceDirectory+"sourceZipFile.zip", tempSourceDirectory);
+		cveDataHelper.downloadSourceFile(downloadURL, tempSourceDirectory+"cvelist-master.zip", tempSourceDirectory);
 		LOGGER.info("Source file download completed");
 
 		//Extracting the zip file
 		LOGGER.info("Source extraction started");
-		cveDataHelper.extractSourceFile(tempSourceDirectory+"sourceZipFile.zip",tempSourceDirectory);
+		cveDataHelper.extractSourceFile(tempSourceDirectory+"cvelist-master.zip",tempSourceDirectory);
 		LOGGER.info("Source extraction completed");
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -88,9 +87,10 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		//Create a list of file consisting all the source files
 		List<File> sourceCveFiles = new ArrayList<>();
 		cveDataHelper.getSourceFiles(tempSourceDirectory, sourceCveFiles);
-		LOGGER.info("Total files in SourceKeep is {}", sourceCveFiles.size());
+		LOGGER.info("Total count of files = {}", sourceCveFiles.size());
 
 		//Writing the source files to S3 sourcekeep bucket
+		LOGGER.info("Sourcekeep File writing to S3 started");
 		for(File file: sourceCveFiles) {
 			
 			FileUtils.copyFileToDirectory(file, new File(sourcekeepDirectory));
@@ -99,13 +99,24 @@ public class CveDataProcessorImpl implements CveDataProcessor {
             PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
             s3Client.putObject(request, Paths.get(sourcekeepDirectory+file.getName()));
 		}
+		LOGGER.info("Sourcekeep File writing to S3 completed");
 
 		//Modifying the source files to eliminate parsing exceptions
 		cveDataHelper.sourceModifier(sourceCveFiles, mapper);
-		List<JSONArray> messagebatch = new ArrayList<>();
-
+//		List<JSONArray> messagebatch = new ArrayList<>();
+		
+		//Getting the modified source files
+		List<File> modifiedFiles = new ArrayList<>();
+		cveDataHelper.getSourceFiles(tempSourceDirectory+"cvelist-master/", modifiedFiles);
+		
+		//Create livekeep directory if it does not exists
+		File livekeepFile = new File(livekeepDirectory);
+		if(!livekeepFile.exists())
+			livekeepFile.mkdirs();
+		
+		//Parsing sourcekeep files into livekeep format
 		LOGGER.info("Parsing started");
-		for (File file : sourceCveFiles) {
+		for (File file : modifiedFiles) {
 
 			String fileName = file.getName();
 
@@ -126,10 +137,6 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			cveDataHelper.getCvssV2(source, liveKeep);
 			
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-			
-			File livekeepFile = new File(livekeepDirectory);
-			if(!livekeepFile.exists())
-				livekeepFile.mkdirs();
 			mapper.writeValue(new File(livekeepDirectory + fileName), liveKeep);
 			
             String objectKey = sourceCveS3Path + "/mitre/" + fileName;
@@ -140,7 +147,8 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 //			createKafkaMessage(fileName, messagebatch);
 			
 			}catch(Exception e) {
-				LOGGER.info("Parsing exception occurred at file {}",fileName);
+				LOGGER.info("Parsing exception occurred while genarating livekeep file {}",fileName);
+				e.printStackTrace();
 			}
 		}
 		
@@ -163,10 +171,9 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		String duration = cveDataHelper.findDuration(startTime, endTime);
 		
 		LOGGER.info(duration);
-
 	}
 	
-	//Creating the kafka JSON message format
+	//Creating the kafka message in JSON format
 	public void createKafkaMessage(String fileName, List<JSONArray> messagebatch) {
 
 		JSONArray message = new JSONArray();

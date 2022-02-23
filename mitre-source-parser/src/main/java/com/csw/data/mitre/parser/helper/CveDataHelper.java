@@ -3,15 +3,16 @@ package com.csw.data.mitre.parser.helper;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -24,8 +25,6 @@ import java.util.zip.ZipFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import com.csw.data.mitre.cve.pojo.Bm;
@@ -49,6 +48,10 @@ import com.csw.data.mitre.cve.pojo.VulnerabilityRoot;
 import com.csw.data.mitre.cve.pojo.VulnerabilitySourceRoot;
 import com.csw.data.mitre.cve.pojo.Weaknesses;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Component
 public class CveDataHelper {
@@ -80,6 +83,7 @@ public class CveDataHelper {
 	private static final String CHANGED = "CHANGED";
 	private static final String UNCHANGED = "UNCHANGED";
 	
+	//Method to download the file from a provided url
 	public void downloadSourceFile(String url, String sourceZipFile, String path) throws IOException {
 		
 		File directory = new File(path);
@@ -95,6 +99,7 @@ public class CveDataHelper {
 		}
 	}
 	
+	//Method to extract a zip file
 	public void extractSourceFile(String sourceZipFile, String destinationPath) throws IOException {
 
 		File destDir = new File(destinationPath);
@@ -125,7 +130,7 @@ public class CveDataHelper {
 		}
 	}
 	
-	//Method to read all the source files from the directory
+	//Method to read all the files from a directory and add it to a list
 	public void getSourceFiles(String directoryName, List<File> files) {
 		File directory = new File(directoryName);
 		
@@ -152,36 +157,37 @@ public class CveDataHelper {
 	public void sourceModifier(List<File> cveFiles, ObjectMapper mapper) throws Exception {
 
 		for (File file : cveFiles) {
-			
+
 			String sourceJsonString = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-			
-			JSONObject sourceJsonObject = new JSONObject(sourceJsonString);
+
+			JsonObject sourceJsonObject = new Gson().fromJson(sourceJsonString, JsonObject.class);
 			String sourceJsonObjectString = sourceJsonObject.toString();
 
 			sourceJsonObjectString = updateImpactArray(sourceJsonObject, sourceJsonObjectString);
 			sourceJsonObjectString = updateCVSSAndBaseScore(sourceJsonObject, sourceJsonObjectString);
 			try {
-			VulnerabilitySourceRoot source = mapper.readValue(sourceJsonObjectString,
-					VulnerabilitySourceRoot.class);
+				VulnerabilitySourceRoot source = mapper.readValue(sourceJsonObjectString,
+						VulnerabilitySourceRoot.class);
 
-			FileWriter fileWriter = new FileWriter(file.getAbsolutePath(), false);
-			try (PrintWriter printWriter = new PrintWriter(fileWriter, false)) {
+				FileOutputStream outputStream = new FileOutputStream(file.getAbsolutePath(), false);
+				try (OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
 
-				printWriter.flush();
-				printWriter.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(source));
-			}
-
-			fileWriter.close();
-			}catch(Exception e) {
-				LOGGER.info("Parsing exception occured at file {}",file.getName());
+					outputWriter.flush();
+					outputWriter.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(source));
+				}
+				outputStream.close();
+				
+			} catch (Exception e) {
+				LOGGER.info("Parsing exception occured while modifying source at file {}", file.getName());
 			}
 		}
+
 	}
 
 	//This method is used to rename the Impact JSONArray field to impactArray
-	public String updateImpactArray(JSONObject jsonObject, String sourceJsonObjectString) {
+	public String updateImpactArray(JsonObject jsonObject, String sourceJsonObjectString) {
 		try {
-			if (jsonObject.get(IMPACT) instanceof JSONArray) 
+			if (jsonObject.get(IMPACT) instanceof JsonArray) 
 				sourceJsonObjectString = sourceJsonObjectString.replace(IMPACT, IMPACTARRAY);
 			
 		} catch (Exception e) {
@@ -191,11 +197,11 @@ public class CveDataHelper {
 	}
 
 	//This method is used to rename a CVSS JSONArray to cvssArray
-	public String updateCVSSAndBaseScore(JSONObject sourceJsonObject, String sourceJsonObjectString) {
+	public String updateCVSSAndBaseScore(JsonObject sourceJsonObject, String sourceJsonObjectString) {
 		try {
-			if (sourceJsonObject.get(IMPACT) instanceof JSONObject) {
+			if (sourceJsonObject.get(IMPACT) instanceof JsonObject) {
 
-				JSONObject impactJsonObject = sourceJsonObject.getJSONObject(IMPACT);
+				JsonObject impactJsonObject = sourceJsonObject.getAsJsonObject(IMPACT);
 				sourceJsonObjectString = updateCvss(impactJsonObject, sourceJsonObject, sourceJsonObjectString);
 			}
 		} catch (Exception e) {
@@ -205,11 +211,11 @@ public class CveDataHelper {
 	}
 
 	//This method is used to rename a CVSS JSONArray to cvssArray along with baseScore and nested CVSS JsonArray
-	public String updateCvss(JSONObject impactJsonObject, JSONObject sourceJsonObject, String sourceJsonObjectString) {
+	public String updateCvss(JsonObject impactJsonObject, JsonObject sourceJsonObject, String sourceJsonObjectString) {
 		try {
-			if (sourceJsonObject.getJSONObject(IMPACT).get(CVSS) instanceof JSONArray) {
+			if (sourceJsonObject.getAsJsonObject(IMPACT).get(CVSS) instanceof JsonArray) {
 
-				JSONArray cvssJsonArray = impactJsonObject.getJSONArray(CVSS);
+				JsonArray cvssJsonArray = impactJsonObject.getAsJsonArray(CVSS);
 
 				sourceJsonObjectString = updateBaseScore(cvssJsonArray, sourceJsonObjectString);
 				sourceJsonObjectString = updateBaseScore(sourceJsonObject, impactJsonObject, sourceJsonObjectString);
@@ -222,13 +228,13 @@ public class CveDataHelper {
 	}
 
 	//This method is used to rename CVSS nested JSONArray to cvssArray1
-	public String updateCvssArray(JSONObject impactJsonObject, String sourceJsonObjectString) {
+	public String updateCvssArray(JsonObject impactJsonObject, String sourceJsonObjectString) {
 		try {
 			Object cvssObject = impactJsonObject.get(CVSS);
-			if (cvssObject instanceof JSONArray) {
-				JSONArray cvssArray = impactJsonObject.getJSONArray(CVSS);
+			if (cvssObject instanceof JsonArray) {
+				JsonArray cvssArray = impactJsonObject.getAsJsonArray(CVSS);
 
-				if (cvssArray.get(0) instanceof JSONArray) 
+				if (cvssArray.get(0) instanceof JsonArray) 
 					sourceJsonObjectString = sourceJsonObjectString.replace(CVSS, "cvssArray1");
 				else 
 					sourceJsonObjectString = sourceJsonObjectString.replace(CVSS, CVSSARRAY);
@@ -240,11 +246,11 @@ public class CveDataHelper {
 	}
 
 	//Rename baseScore string field as baseScoreString inside the cvss JSONObject field
-	public String updateBaseScore(JSONObject sourceJsonObject, JSONObject impactJsonObject, String sourceJsonObjectString) {
+	public String updateBaseScore(JsonObject sourceJsonObject, JsonObject impactJsonObject, String sourceJsonObjectString) {
 		try {
-			if (sourceJsonObject.getJSONObject(IMPACT).get(CVSS) instanceof JSONObject) {
+			if (sourceJsonObject.getAsJsonObject(IMPACT).get(CVSS) instanceof JsonObject) {
 
-				JSONObject cvssJsonObject = impactJsonObject.getJSONObject(CVSS);
+				JsonObject cvssJsonObject = impactJsonObject.getAsJsonObject(CVSS);
 				Object baseScore = cvssJsonObject.get(BASESCORE);
 
 				if (baseScore instanceof String) {
@@ -261,10 +267,10 @@ public class CveDataHelper {
 	}
 
 	//Rename baseScore String field as baseScoreString inside CVSS JSONArray field
-	public String updateBaseScore(JSONArray cvssJsonArray, String sourceJsonObjectString) {
-		for (int i = 0; i < cvssJsonArray.length(); i++) {
+	public String updateBaseScore(JsonArray cvssJsonArray, String sourceJsonObjectString) {
+		for (JsonElement element : cvssJsonArray) {
 			try {
-				JSONObject cvssJsonObject = cvssJsonArray.getJSONObject(i);
+				JsonObject cvssJsonObject = element.getAsJsonObject();
 				Object baseScore = cvssJsonObject.get(BASESCORE);
 				if (cvssJsonObject.get(BASESCORE) != null && baseScore instanceof String) {
 
@@ -329,7 +335,17 @@ public class CveDataHelper {
 	
 	//Method to set the published date
 	public void setPublishedDate(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep) {
-		liveKeep.setPublishedDate(source.getCVEDataMeta().getDatePublic());
+		String date = source.getCVEDataMeta().getDatePublic();
+		if (date != null) {
+			SimpleDateFormat viDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			try {
+				viDateFormat.parse(date);
+			} catch (Exception e) {
+				date = date.concat("T00:00:00Z");
+			}
+			liveKeep.setPublishedDate(date);
+		} else
+			liveKeep.setPublishedDate(null);
 	}
 
 	//Method to get the weakness id from the field where value is english

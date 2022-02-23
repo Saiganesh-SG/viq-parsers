@@ -118,6 +118,11 @@
 			<version>20201115</version>
 		</dependency>
 		<dependency>
+    		<groupId>com.google.code.gson</groupId>
+    		<artifactId>gson</artifactId>
+    		<version>2.9.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.leadpony.justify</groupId>
 			<artifactId>justify</artifactId>
 			<version>3.1.0</version>
