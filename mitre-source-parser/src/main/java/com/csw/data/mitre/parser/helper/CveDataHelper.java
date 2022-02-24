@@ -14,8 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -165,7 +168,7 @@ public class CveDataHelper {
 	 *    CVSS          JSONArray         cvssArray
 	 *    CVSS       Nested JSONArray     cvssArray1
 	*/
-	public void sourceModifier(List<File> cveFiles, ObjectMapper mapper) throws Exception {
+	public void sourceModifier(List<File> cveFiles, ObjectMapper mapper) throws IOException {
 
 		for (File file : cveFiles) {
 
@@ -346,16 +349,28 @@ public class CveDataHelper {
 	
 	//Method to set the published date
 	public void setPublishedDate(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep) {
+		
 		String date = source.getCVEDataMeta().getDatePublic();
 		if (date != null) {
-			SimpleDateFormat viDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			String formattedDate = null;
 			try {
-				viDateFormat.parse(date);
+				var localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
+				var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				formattedDate = localDateTime.format(formatter);
 			} catch (Exception e) {
-				date = date.concat("T00:00:00Z");
+				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat liveFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				Date date1 = null;
+				try {
+					date1 = sourceFormat.parse(date);
+					formattedDate = liveFormat.format(date1);
+				} catch (Exception e1) {
+					//
+				}
 			}
-			liveKeep.setPublishedDate(date);
-		} else
+			liveKeep.setPublishedDate(formattedDate);
+		}
+		else
 			liveKeep.setPublishedDate(null);
 	}
 
