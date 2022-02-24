@@ -6,8 +6,8 @@ node{
                                     extensions: [[ $class: 'RelativeTargetDirectory',
                                                    relativeTargetDir: 'JenkinsFile']],
                                     submoduleCfg: [],
-                                    userRemoteConfigs: [[ credentialsId: 'Jenkins_Gitlab',
-                                                          url: 'git@gitlab.com:csw_beta_developers/devops/jenkins-pipeline.git']]
+                                    userRemoteConfigs: [[ credentialsId: 'securin-codecommit',
+                                                          url: 'https://git-codecommit.us-west-2.amazonaws.com/v1/repos/jenkins-pipeline.git']]
                  ])
             jenkinsfile= load 'JenkinsFile/viq-ci-cd.pipeline'
     }
