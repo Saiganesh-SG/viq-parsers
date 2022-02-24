@@ -84,16 +84,6 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		cveDataHelper.getSourceFiles(sourcekeepDirectory, sourceCveFiles);
 		LOGGER.info("Total count of files = {}", sourceCveFiles.size());
 
-		//Writing the source files to S3 sourcekeep bucket
-		LOGGER.info("Sourcekeep File writing to S3 started");
-		for(File file: sourceCveFiles) {
-			
-            String objectKey = sourceCveS3Path + file.getName();
-            PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
-            s3Client.putObject(request, Paths.get(sourcekeepDirectory+file.getName()));
-		}
-		LOGGER.info("Sourcekeep File writing to S3 completed");
-
 		//Modifying the source files to eliminate parsing exceptions
 		cveDataHelper.sourceModifier(sourceCveFiles, mapper);
 //		List<JSONArray> messagebatch = new ArrayList<>();
@@ -132,7 +122,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 			mapper.writeValue(new File(livekeepDirectory + fileName), liveKeep);
 			
-            String objectKey = sourceCveS3Path + "/mitre/" + fileName;
+            String objectKey = liveCveS3Path + fileName;
             PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
             s3Client.putObject(request, Paths.get(livekeepDirectory + fileName));
 			
