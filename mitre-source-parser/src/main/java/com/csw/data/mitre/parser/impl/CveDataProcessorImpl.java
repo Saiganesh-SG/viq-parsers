@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.ListUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -53,14 +54,14 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 	@Value("${parse.cve.download.url}")
 	private String downloadURL;
 	
-//    @Value("${data.kafka.vulnerability.topic}")
-//    private String vulnerabilityKafkaTopic;
-//    
-//    @Value("${batch.kafka.size}")
-//    private int kafkaBatchSize;
-//	
-//    @Autowired
-//    private KafkaTemplate<String, String> kafkaTemplate;
+    @Value("${data.kafka.vulnerability.topic}")
+    private String vulnerabilityKafkaTopic;
+    
+    @Value("${batch.kafka.size}")
+    private int kafkaBatchSize;
+	
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
 	@Override
 	public void process() throws Exception {
@@ -86,7 +87,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 
 		//Modifying the source files to eliminate parsing exceptions
 		cveDataHelper.sourceModifier(sourceCveFiles, mapper);
-//		List<JSONArray> messagebatch = new ArrayList<>();
+		List<JSONArray> messagebatch = new ArrayList<>();
 		
 		//Getting the modified source files
 		List<File> modifiedFiles = new ArrayList<>();
@@ -122,12 +123,13 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 			mapper.writeValue(new File(livekeepDirectory + fileName), liveKeep);
 			
+			//Writing file into S3
             String objectKey = liveCveS3Path + fileName;
             PutObjectRequest request = PutObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
             s3Client.putObject(request, Paths.get(livekeepDirectory + fileName));
 			
             //Creating kafka message
-//			createKafkaMessage(fileName, messagebatch);
+			createKafkaMessage(fileName, messagebatch);
 			
 			}catch(Exception e) {
 				LOGGER.info("Parsing exception occurred while genarating livekeep file {}",fileName);
@@ -136,17 +138,17 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		}
 		
 		//Sending messages to kafka at 1000 message per batch
-//		JSONObject kafkaMessage = new JSONObject();
-//		List<List<JSONArray>> partitionKafkaMessage = ListUtils.partition(messagebatch, kafkaBatchSize);
-//		for(int i=0;i<partitionKafkaMessage.size();i++) {
-//			
-//			kafkaMessage.put("messages", partitionKafkaMessage.get(i)).put("forceUpdate", true);
-//			try {
-//				kafkaTemplate.send(vulnerabilityKafkaTopic, kafkaMessage.toString());
-//			}catch(Exception e) {
-//				LOGGER.error("Error while sending the message : {}", e.getMessage());
-//			}
-//		}
+		JSONObject kafkaMessage = new JSONObject();
+		List<List<JSONArray>> partitionKafkaMessage = ListUtils.partition(messagebatch, kafkaBatchSize);
+		for(int i=0;i<partitionKafkaMessage.size();i++) {
+			
+			kafkaMessage.put("messages", partitionKafkaMessage.get(i)).put("forceUpdate", true);
+			try {
+				kafkaTemplate.send(vulnerabilityKafkaTopic, kafkaMessage.toString());
+			}catch(Exception e) {
+				LOGGER.error("Error while sending the message : {}", e.getMessage());
+			}
+		}
 		
 		LOGGER.info("Parsing completed");
 		
@@ -163,7 +165,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		JSONObject messageObject = new JSONObject();	
 		
 		messageObject.put("id", fileName);
-		messageObject.put("uri", livekeepDirectory+fileName);
+		messageObject.put("uri","s3://"+s3BucketName+"/"+liveCveS3Path+fileName);
 		messageObject.put("fileType", "CVE");
 		messageObject.put("source", "Mitre");
 		messageObject.put("delete", false);
