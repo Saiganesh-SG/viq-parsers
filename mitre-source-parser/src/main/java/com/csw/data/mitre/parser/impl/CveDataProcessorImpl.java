@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.ListUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +86,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 
 		//Modifying the source files to eliminate parsing exceptions
 		cveDataHelper.sourceModifier(sourceCveFiles, mapper);
-		List<JSONArray> messagebatch = new ArrayList<>();
+		List<JSONObject> messagebatch = new ArrayList<>();
 		
 		//Getting the modified source files
 		List<File> modifiedFiles = new ArrayList<>();
@@ -100,12 +99,12 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		
 		//Parsing sourcekeep files into livekeep format
 		LOGGER.info("Parsing started");
-		for (File file : modifiedFiles) {
+		for (int i=0;i<50;i++) {
 
-			String fileName = file.getName();
+			String fileName = modifiedFiles.get(i).getName();
 
 			try {
-			VulnerabilitySourceRoot source = mapper.readValue(file, VulnerabilitySourceRoot.class);
+			VulnerabilitySourceRoot source = mapper.readValue(modifiedFiles.get(i), VulnerabilitySourceRoot.class);
 			VulnerabilityRoot liveKeep = new VulnerabilityRoot();
 
 			cveDataHelper.setVulnerabilityId(source, liveKeep);
@@ -139,7 +138,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		
 		//Sending messages to kafka at 1000 message per batch
 		JSONObject kafkaMessage = new JSONObject();
-		List<List<JSONArray>> partitionKafkaMessage = ListUtils.partition(messagebatch, kafkaBatchSize);
+		List<List<JSONObject>> partitionKafkaMessage = ListUtils.partition(messagebatch, kafkaBatchSize);
 		for(int i=0;i<partitionKafkaMessage.size();i++) {
 			
 			kafkaMessage.put("messages", partitionKafkaMessage.get(i)).put("forceUpdate", true);
@@ -151,25 +150,22 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		}
 		
 		LOGGER.info("Parsing completed");
-		
 		Long endTime = System.nanoTime();
 		String duration = cveDataHelper.findDuration(startTime, endTime);
-		
 		LOGGER.info(duration);
 	}
 	
 	//Creating the kafka message in JSON format
-	public void createKafkaMessage(String fileName, List<JSONArray> messagebatch) {
-
-		JSONArray message = new JSONArray();
-		JSONObject messageObject = new JSONObject();	
+	public void createKafkaMessage(String fileName, List<JSONObject> messagebatch) {
 		
-		messageObject.put("id", fileName);
+		JSONObject messageObject = new JSONObject();
+		String id = fileName.split("\\.")[0];
+		
+		messageObject.put("id", id);
 		messageObject.put("uri","s3://"+s3BucketName+"/"+liveCveS3Path+fileName);
 		messageObject.put("fileType", "CVE");
 		messageObject.put("source", "Mitre");
 		messageObject.put("delete", false);
-		message.put(messageObject);
-		messagebatch.add(message);		
+		messagebatch.add(messageObject);		
 	}
 }
