@@ -99,12 +99,12 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		
 		//Parsing sourcekeep files into livekeep format
 		LOGGER.info("Parsing started");
-		for (int i=0;i<50;i++) {
+		for (File file : modifiedFiles) {
 
-			String fileName = modifiedFiles.get(i).getName();
+			String fileName = file.getName();
 
 			try {
-			VulnerabilitySourceRoot source = mapper.readValue(modifiedFiles.get(i), VulnerabilitySourceRoot.class);
+			VulnerabilitySourceRoot source = mapper.readValue(file, VulnerabilitySourceRoot.class);
 			VulnerabilityRoot liveKeep = new VulnerabilityRoot();
 
 			cveDataHelper.setVulnerabilityId(source, liveKeep);
@@ -136,7 +136,6 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			}
 		}
 		
-		LOGGER.info("Kakfa Topic Name = {}", vulnerabilityKafkaTopic);
 		//Sending messages to kafka at 1000 message per batch
 		JSONObject kafkaMessage = new JSONObject();
 		List<List<JSONObject>> partitionKafkaMessage = ListUtils.partition(messagebatch, kafkaBatchSize);
@@ -145,7 +144,6 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			kafkaMessage.put("messages", partitionKafkaMessage.get(i)).put("forceUpdate", true);
 			try {
 				kafkaTemplate.send(vulnerabilityKafkaTopic, kafkaMessage.toString());
-				LOGGER.info("Kafka Message : {}",kafkaMessage.toString());
 			}catch(Exception e) {
 				LOGGER.error("Error while sending the message : {}", e.getMessage());
 			}
