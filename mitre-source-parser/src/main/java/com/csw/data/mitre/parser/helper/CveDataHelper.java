@@ -51,6 +51,7 @@ import com.csw.data.mitre.cve.pojo.Tm;
 import com.csw.data.mitre.cve.pojo.VulnerabilityRoot;
 import com.csw.data.mitre.cve.pojo.VulnerabilitySourceRoot;
 import com.csw.data.mitre.cve.pojo.Weaknesses;
+import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -1348,5 +1349,16 @@ public class CveDataHelper {
 		
 		return "Parser took "+hours+" hour "+minutes+" minutes "+seconds+" seconds to complete";
 	}
+
+    public void setSource(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep) {
+        if (null != liveKeep.getId()) {
+            List<com.csw.data.mitre.cve.pojo.Source> sources = new ArrayList<>();
+            com.csw.data.mitre.cve.pojo.Source sourceData = new com.csw.data.mitre.cve.pojo.Source();
+            sourceData.setSourceName(ParserConstants.MITRE_TITLE);
+            sourceData.setSourceUrl(ParserConstants.MITRE_BASE_URL + liveKeep.getId());
+            sources.add(sourceData);
+            liveKeep.setSources(sources);
+        }
+    }
 
 }
