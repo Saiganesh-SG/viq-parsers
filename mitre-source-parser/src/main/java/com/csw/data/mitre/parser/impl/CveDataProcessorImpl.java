@@ -108,6 +108,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			VulnerabilityRoot liveKeep = new VulnerabilityRoot();
 
 			cveDataHelper.setVulnerabilityId(source, liveKeep);
+			cveDataHelper.setSource(source, liveKeep);
 			cveDataHelper.setDescriptions(source, liveKeep);
 			cveDataHelper.setAssignerEmail(source, liveKeep);
 			cveDataHelper.setRequesterEmail(source, liveKeep);

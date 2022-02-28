@@ -42,9 +42,11 @@ import com.csw.data.nvd.json.targets.Cvssv2;
 import com.csw.data.nvd.json.targets.Cvssv3;
 import com.csw.data.nvd.json.targets.CweList;
 import com.csw.data.nvd.json.targets.Reference;
+import com.csw.data.nvd.json.targets.Source;
 import com.csw.data.nvd.json.targets.VendorComment;
 import com.csw.data.nvd.json.targets.Vulnerability;
 import com.csw.data.nvd.json.targets.VulnerabilityRiskScore;
+import com.csw.data.util.ParserConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
@@ -79,6 +81,7 @@ public class CveConstructor {
 		vulnerability.setAssigner(cve.getCVEDataMeta().getAssigner());
 		vulnerability.setPublishedDate(formatDate(cveItem.getPublishedDate()));
 		vulnerability.setLastModifiedDate(formatDate(cveItem.getLastModifiedDate()));
+		vulnerability.setSources(createSource(cve.getCVEDataMeta().getId()));
 		
 		if(null != cve.getDescription() && !CollectionUtils.isEmpty(cve.getDescription().getDescriptionData())) {
 		    List<String> desciptions = new ArrayList<>();
@@ -187,7 +190,16 @@ public class CveConstructor {
 		return vulnerability;
 	}
 
-	private Float convertToFloat(Double baseScore) {
+	private List<Source> createSource(String id) {
+        List<Source> sources = new ArrayList<Source>();
+        Source source = new Source();
+        source.setSourceName(ParserConstants.NVD_TITLE);
+        source.setSourceUrl(ParserConstants.NVD_BASE_URL + id);
+        sources.add(source);
+        return sources;
+    }
+
+    private Float convertToFloat(Double baseScore) {
 	    Float result = null;
         if(null == baseScore) {
             return result;
