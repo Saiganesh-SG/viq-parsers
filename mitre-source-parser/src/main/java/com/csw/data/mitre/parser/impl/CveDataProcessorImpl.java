@@ -2,8 +2,12 @@ package com.csw.data.mitre.parser.impl;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.ListUtils;
 import org.json.JSONObject;
@@ -16,8 +20,12 @@ import org.springframework.stereotype.Service;
 
 import com.csw.data.mitre.parser.CveDataProcessor;
 import com.csw.data.mitre.parser.helper.CveDataHelper;
+import com.csw.data.mitre.audit.MitreJobStatusEnumeration;
+import com.csw.data.mitre.audit.MitreParserAudit;
+import com.csw.data.mitre.audit.RecordDetails;
 import com.csw.data.mitre.cve.pojo.VulnerabilityRoot;
 import com.csw.data.mitre.cve.pojo.VulnerabilitySourceRoot;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -65,7 +73,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 	@Override
 	public void process() throws Exception {
 		
-		Long startTime = System.nanoTime();
+		LocalDateTime startTime = LocalDateTime.now();
 
 		//Downloading zip file from Github link
 		LOGGER.info("Source file download started");
@@ -91,6 +99,9 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		//Getting the modified source files
 		List<File> modifiedFiles = new ArrayList<>();
 		cveDataHelper.getSourceFiles(sourcekeepDirectory, modifiedFiles);
+		
+		//List to get the CVEs which failed parsing
+		List<String> failedRecords = new ArrayList<>();
 		
 		//Create livekeep directory if it does not exists
 		File livekeepFile = new File(livekeepDirectory);
@@ -133,11 +144,13 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			
 			}catch(Exception e) {
 				LOGGER.info("Parsing exception occurred while genarating livekeep file {}",fileName);
+				failedRecords.add(fileName);
 				e.printStackTrace();
 			}
 		}
 		
 		//Sending messages to kafka at 1000 message per batch
+		LOGGER.info("Sending message to Kafka");
 		JSONObject kafkaMessage = new JSONObject();
 		List<List<JSONObject>> partitionKafkaMessage = ListUtils.partition(messagebatch, kafkaBatchSize);
 		for(int i=0;i<partitionKafkaMessage.size();i++) {
@@ -151,9 +164,10 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		}
 		
 		LOGGER.info("Parsing completed");
-		Long endTime = System.nanoTime();
-		String duration = cveDataHelper.findDuration(startTime, endTime);
-		LOGGER.info(duration);
+		LocalDateTime endTime = LocalDateTime.now();
+		
+		String jobAudit = auditLog(startTime, endTime, failedRecords.size(), modifiedFiles.size());
+		LOGGER.info("Job Audit : {}", jobAudit);
 	}
 	
 	//Creating the kafka message in JSON format
@@ -168,5 +182,31 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 		messageObject.put("source", "Mitre");
 		messageObject.put("delete", false);
 		messagebatch.add(messageObject);		
+	}
+	
+	//Method to create tje Job Audit Log JSON
+	public String auditLog(LocalDateTime startTime, LocalDateTime endTime, int failed, int records) throws JsonProcessingException {
+		
+		MitreParserAudit audit = new MitreParserAudit();
+		DateTimeFormatter auditTimeFormat = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss");
+		Long jobStartTime = TimeUnit.MILLISECONDS.toSeconds(Timestamp.valueOf(startTime).getTime()); 
+		Long jobEndTime = TimeUnit.MILLISECONDS.toSeconds(Timestamp.valueOf(endTime).getTime());
+		
+		RecordDetails recordDetails = new RecordDetails();
+		recordDetails.setFailedRecords(failed);
+		recordDetails.setModifiedRecords(0);
+		recordDetails.setNewRecords(records);
+		recordDetails.setTotalRecords(records);
+		
+		audit.setStartTime(auditTimeFormat.format(startTime));
+		audit.setEndTime(auditTimeFormat.format(endTime));
+		audit.setJobName("Mitre CVE Parser");
+		audit.setRefreshType("Full Refresh");
+		audit.setTotalTime(String.valueOf(jobEndTime - jobStartTime));
+		audit.setRecordDetails(recordDetails);
+		audit.setJobStatus(MitreJobStatusEnumeration.COMPLETED);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.writeValueAsString(audit);
 	}
 }

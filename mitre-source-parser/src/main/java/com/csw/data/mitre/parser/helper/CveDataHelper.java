@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -1332,22 +1331,6 @@ public class CveDataHelper {
 			if(vectorList.get(i).equalsIgnoreCase("A:C"))
 				cvssv2.setAvailabilityImpact(COMPLETE);
 		}
-	}
-	
-	//Method to find the duration
-	public String findDuration(Long startTime, Long endTime) {
-		
-		Long duration = endTime - startTime;
-		
-		long hours = TimeUnit.NANOSECONDS.toHours(duration);
-		duration = duration - TimeUnit.HOURS.toNanos(hours);
-		
-		long minutes = TimeUnit.NANOSECONDS.toMinutes(duration);
-		duration = duration - TimeUnit.MINUTES.toNanos(minutes);
-		
-		long seconds = TimeUnit.NANOSECONDS.toSeconds(duration);
-		
-		return "Parser took "+hours+" hour "+minutes+" minutes "+seconds+" seconds to complete";
 	}
 
     public void setSource(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep) {
