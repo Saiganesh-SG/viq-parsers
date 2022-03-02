@@ -378,8 +378,7 @@ public class CveDataHelper {
 	public void setWeaknessId(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep) {
 
 		List<Weaknesses> weaknessIds = new ArrayList<>();
-		Weaknesses weaknesses = new Weaknesses();
-
+		
 		ProblemType problemType = source.getProblemtype();
 		if (problemType != null) {
 			List<ProblemTypeData> problemTypeData = problemType.getProblemTypeData();
@@ -390,13 +389,14 @@ public class CveDataHelper {
 					if (description.get(j).getLang().equalsIgnoreCase(ENGLISH)) {
 						String id = findWeaknessId(description.get(j).getValue());
 						if (id != null) {
+							Weaknesses weaknesses = new Weaknesses();
 							weaknesses.setId(id);
 							weaknessIds.add(weaknesses);
 						}
-						liveKeep.setWeaknesses(weaknessIds);
 					}
 				}
 			}
+			liveKeep.setWeaknesses(weaknessIds);
 		}else
 			liveKeep.setWeaknesses(new ArrayList<>());
 	}
