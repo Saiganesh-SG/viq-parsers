@@ -61,5 +61,8 @@ public class Cvss {
 	
 	@JsonProperty("temporalScore")
 	private String temporalScore;
+	
+	@JsonProperty("confidentialityRequirement")
+	private String confidentialityRequirement;
 
 }

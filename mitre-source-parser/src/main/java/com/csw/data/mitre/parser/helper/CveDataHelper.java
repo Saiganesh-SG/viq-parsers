@@ -338,8 +338,25 @@ public class CveDataHelper {
 	}
 
 	//Method to set Vulnerability status
-	public void setVulnerabilityStatus(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep) {
-		 liveKeep.setStatus(source.getCVEDataMeta().getState());
+	public void setVulnerabilityStatus(VulnerabilitySourceRoot source, VulnerabilityRoot liveKeep, List<String> descriptions) {
+		//Checks if description has ** DISPUTED ** then sets status as DISPUTED
+		String status = null;
+		String regex = "\\*\\* DISPUTED \\*\\*";
+		for (String description : descriptions) {
+			Pattern pattern = Pattern.compile(regex);
+			Matcher matcher = pattern.matcher(description);
+			while (matcher.find()) {
+				status = matcher.group();
+			}
+			if (null != status)
+				break;
+		}
+		if (null != status)
+			liveKeep.setStatus("DISPUTED");
+		else if (source.getCVEDataMeta().getState().equals("REJECT"))
+			liveKeep.setStatus("REJECTED");
+		else
+			liveKeep.setStatus(source.getCVEDataMeta().getState());
 	}
 
 	//Method to set vulnerability title
