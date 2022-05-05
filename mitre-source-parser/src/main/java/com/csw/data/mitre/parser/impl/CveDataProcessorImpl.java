@@ -123,7 +123,7 @@ public class CveDataProcessorImpl implements CveDataProcessor {
 			cveDataHelper.setDescriptions(source, liveKeep);
 			cveDataHelper.setAssignerEmail(source, liveKeep);
 			cveDataHelper.setRequesterEmail(source, liveKeep);
-			cveDataHelper.setVulnerabilityStatus(source, liveKeep);
+			cveDataHelper.setVulnerabilityStatus(source, liveKeep, liveKeep.getDescriptions());
 			cveDataHelper.setVulnerabilityTitle(source, liveKeep);
 			cveDataHelper.setWeaknessId(source, liveKeep);
 			cveDataHelper.setReferences(source, liveKeep);
