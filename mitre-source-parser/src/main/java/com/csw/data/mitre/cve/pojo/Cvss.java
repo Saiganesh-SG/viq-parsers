@@ -64,5 +64,8 @@ public class Cvss {
 	
 	@JsonProperty("confidentialityRequirement")
 	private String confidentialityRequirement;
+	
+	@JsonProperty("environmentalSeverity")
+	private String environmentalSeverity;
 
 }

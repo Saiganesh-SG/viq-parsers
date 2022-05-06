@@ -193,6 +193,7 @@ public class CveDataHelper {
 				
 			} catch (Exception e) {
 				LOGGER.info("Parsing exception occured while modifying source at file {}", file.getName());
+				e.printStackTrace();
 			}
 		}
 
@@ -353,7 +354,7 @@ public class CveDataHelper {
 		}
 		if (null != status)
 			liveKeep.setStatus("DISPUTED");
-		else if (source.getCVEDataMeta().getState().equals("REJECT"))
+		else if (null != source.getCVEDataMeta().getState() && source.getCVEDataMeta().getState().equals("REJECT"))
 			liveKeep.setStatus("REJECTED");
 		else
 			liveKeep.setStatus(source.getCVEDataMeta().getState());
