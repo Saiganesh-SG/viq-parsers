@@ -116,7 +116,11 @@ public class CveConstructor {
 			Cvssv3 cvssv3 = new Cvssv3();
 			cvssv3.setCvssV3version(baseMetricV3.getCvssV3().getVersion());
 			cvssv3.setCvssV3vectorString(baseMetricV3.getCvssV3().getVectorString());
-			cvssv3.setCvssV3attackVector(baseMetricV3.getCvssV3().getAttackVector().value());
+			if (baseMetricV3.getCvssV3().getAttackVector().value().equals("ADJACENT_NETWORK")) {
+				cvssv3.setCvssV3attackVector("ADJACENT");
+			} else {
+				cvssv3.setCvssV3attackVector(baseMetricV3.getCvssV3().getAttackVector().value());
+			}
 			cvssv3.setCvssV3attackComplexity(baseMetricV3.getCvssV3().getAttackComplexity().value());
 			cvssv3.setCvssV3privilegesRequired(baseMetricV3.getCvssV3().getPrivilegesRequired().value());
 			cvssv3.setCvssV3userInteraction(baseMetricV3.getCvssV3().getUserInteraction().value());

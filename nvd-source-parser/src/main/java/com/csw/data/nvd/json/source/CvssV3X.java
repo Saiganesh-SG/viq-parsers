@@ -329,7 +329,7 @@ public class CvssV3X {
     public enum AttackVectorType {
 
         NETWORK("NETWORK"),
-        ADJACENT_NETWORK("ADJACENT_NETWORK"),
+        ADJACENT("ADJACENT"),
         LOCAL("LOCAL"),
         PHYSICAL("PHYSICAL");
         private final String value;

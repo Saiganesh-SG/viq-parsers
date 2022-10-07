@@ -81,7 +81,7 @@ public class CveDataHelper {
 	private static final String NONE = "NONE";
 	private static final String LOW = "LOW";
 	private static final String HIGH = "HIGH";
-	private static final String ADJACENT_NETWORK = "ADJACENT_NETWORK";
+	private static final String ADJACENT = "ADJACENT";
 	private static final String PHYSICAL = "PHYSICAL";
 	private static final String REQUIRED = "REQUIRED";
 	private static final String CHANGED = "CHANGED";
@@ -659,7 +659,7 @@ public class CveDataHelper {
 			if (vectorList.get(i).equalsIgnoreCase("AV:N"))
 				cvssv3.setAttackVector(NETWORK);
 			if (vectorList.get(i).equalsIgnoreCase("AV:A")) 
-				cvssv3.setAttackVector(ADJACENT_NETWORK);
+				cvssv3.setAttackVector(ADJACENT);
 			if (vectorList.get(i).equalsIgnoreCase("AV:L"))
 				cvssv3.setAttackVector(LOCAL);
 			if (vectorList.get(i).equalsIgnoreCase("AV:P")) 
@@ -836,7 +836,7 @@ public class CveDataHelper {
 		if (attackVector.equalsIgnoreCase("N"))
 			cvssv3.setAttackVector(NETWORK);
 		if (attackVector.equalsIgnoreCase("A"))
-			cvssv3.setAttackVector(ADJACENT_NETWORK);
+			cvssv3.setAttackVector(ADJACENT);
 		if (attackVector.equalsIgnoreCase("L"))
 			cvssv3.setAttackVector(LOCAL);
 		if (attackVector.equalsIgnoreCase("P"))
@@ -922,7 +922,7 @@ public class CveDataHelper {
 		if (attackVector.equalsIgnoreCase("N"))
 			cvssv3.setAttackVector(NETWORK);
 		if (attackVector.equalsIgnoreCase("A"))
-			cvssv3.setAttackVector(ADJACENT_NETWORK);
+			cvssv3.setAttackVector(ADJACENT);
 		if (attackVector.equalsIgnoreCase("L"))
 			cvssv3.setAttackVector(LOCAL);
 		if (attackVector.equalsIgnoreCase("P"))
@@ -1275,7 +1275,7 @@ public class CveDataHelper {
 			if(vectorList.get(i).equalsIgnoreCase("AV:L"))
 				cvssv2.setAccessVector(LOCAL);
 			if(vectorList.get(i).equalsIgnoreCase("AV:A"))
-				cvssv2.setAccessVector(ADJACENT_NETWORK);
+				cvssv2.setAccessVector("ADJACENT_NETWORK");
 			if(vectorList.get(i).equalsIgnoreCase("AV:N"))
 				cvssv2.setAccessVector(NETWORK);
 		}
