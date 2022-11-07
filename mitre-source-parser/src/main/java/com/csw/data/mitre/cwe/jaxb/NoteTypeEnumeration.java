@@ -49,6 +49,8 @@ public enum NoteTypeEnumeration {
     TERMINOLOGY("Terminology"),
     @XmlEnumValue("Theoretical")
     THEORETICAL("Theoretical"),
+    @XmlEnumValue("Mapping")
+    MAPPING("Mapping"),
     @XmlEnumValue("Other")
     OTHER("Other");
     private final String value;
