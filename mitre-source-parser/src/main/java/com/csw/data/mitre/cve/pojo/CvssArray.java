@@ -1,5 +1,6 @@
 package com.csw.data.mitre.cve.pojo;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -36,6 +37,7 @@ public class CvssArray {
 	private String integrityImpact;
 	
 	@JsonProperty("privilegesRequired")
+	@JsonAlias({"privilegesRequired "})
 	private String privilegesRequired;
 	
 	@JsonProperty("scope")
