@@ -16,5 +16,8 @@ public class Description1 {
 	
 	@JsonProperty("value")
 	private String value;
+
+	@JsonProperty("cweId")
+	private String cweId;
 	
 }

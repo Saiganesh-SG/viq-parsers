@@ -192,7 +192,7 @@ public class CveDataHelper {
 				outputStream.close();
 				
 			} catch (Exception e) {
-				LOGGER.info("Parsing exception occured while modifying source at file {}", file.getName());
+				LOGGER.error("Parsing exception occured while modifying source at file {}", file.getName());
 				e.printStackTrace();
 			}
 		}
