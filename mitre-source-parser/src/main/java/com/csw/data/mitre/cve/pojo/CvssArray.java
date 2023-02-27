@@ -52,4 +52,18 @@ public class CvssArray {
 	@JsonProperty("version")
 	private String version;
 
+	@JsonProperty("exploitCodeMaturity")
+	private String exploitCodeMaturity;
+
+	@JsonProperty("remediationLevel")
+	private String remediationLevel;
+
+	@JsonProperty("reportConfidence")
+	private String reportConfidence;
+
+	@JsonProperty("temporalScore")
+	private String temporalScore;
+
+	@JsonProperty("temporalSeverity")
+	private String temporalSeverity;
 }
