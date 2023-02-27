@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.csw.data</groupId>
 		<artifactId>source-parser</artifactId>
-		<version>23.2.1.1-SNAPSHOT</version>
+		<version>23.3.1.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>source-parser-util</artifactId>
 	<name>source-parser-util</name>
