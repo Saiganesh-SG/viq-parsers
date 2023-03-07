@@ -20,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.csw.data.util.CommonUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -244,14 +245,16 @@ public class CveConstructor {
     private List<AffectedSoftwareConfiguration> getSoftwareConfiguration(List<DefCpeMatch> cpeMatchs, int configurationNumber) {
 		List<AffectedSoftwareConfiguration> affectedSoftwareConfigurations = new ArrayList<>();
 		configurationNumber = configurationNumber+1;
+		String cpe23Uri = null;
 			for (DefCpeMatch defCpeMatch : cpeMatchs) {
 				AffectedSoftwareConfiguration configuration = new AffectedSoftwareConfiguration();
 				configuration.setVulnerable(defCpeMatch.getVulnerable());
 				configuration.setRunningOnOrWith(!defCpeMatch.getVulnerable());
-				configuration.setCpe23Uri(defCpeMatch.getCpe23Uri());
-				configuration.setTitle(defCpeMatch.getCpe23Uri());
-				configuration.setVendor(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 3));
-				configuration.setProduct(getDetailsFromUri(defCpeMatch.getCpe23Uri(), 4));
+				cpe23Uri = CommonUtils.unescapeString(defCpeMatch.getCpe23Uri());
+				configuration.setCpe23Uri(cpe23Uri);
+				configuration.setTitle(cpe23Uri);
+				configuration.setVendor(getDetailsFromUri(cpe23Uri, 3));
+				configuration.setProduct(getDetailsFromUri(cpe23Uri, 4));
 				configuration.setSoftwareConfigurationGroup("Configuration " + configurationNumber);
 				configuration.setVersionStartIncluding(defCpeMatch.getVersionStartIncluding());
 				configuration.setVersionStartExcluding(defCpeMatch.getVersionStartExcluding());

@@ -3,6 +3,7 @@ package com.csw.data.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -50,6 +51,10 @@ public class CommonUtils {
             counter++;
         }
         return jsonArraysList;
+    }
+
+    public static String unescapeString(String input){
+        return StringEscapeUtils.unescapeJava(input);
     }
 
 }
