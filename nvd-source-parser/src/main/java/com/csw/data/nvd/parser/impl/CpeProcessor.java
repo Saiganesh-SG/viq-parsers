@@ -1,26 +1,24 @@
 package com.csw.data.nvd.parser.impl;
 
-import com.csw.data.nvd.json.cpe.source.DefCpeMatch;
-import com.csw.data.nvd.parser.TopicProcessor;
-import com.csw.data.util.CommonUtils;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import com.csw.data.nvd.json.cpe.source.DefCpeMatch;
+import com.csw.data.nvd.parser.TopicProcessor;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Qualifier("CpeProcessor")
@@ -67,23 +65,14 @@ public class CpeProcessor implements TopicProcessor<DefCpeMatch> {
                     if (currentToken == JsonToken.START_ARRAY) {
                         // For each of the records in the array
                         while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                            defCpeMatchs.add(formatDefCpeMatch(jsonParser));
+                            DefCpeMatch defCpeMatch = mapper.readValue(jsonParser, DefCpeMatch.class);
+                            defCpeMatchs.add(defCpeMatch);
                         }
                     }
                 }
             }
         }
         return defCpeMatchs;
-    }
-
-    private DefCpeMatch formatDefCpeMatch(JsonParser jsonParser) throws IOException {
-        ObjectMapper mapper = JsonMapper.builder()
-                .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .build();
-        String requestString = CommonUtils.unescapeString(jsonParser.readValueAsTree().toString());
-        DefCpeMatch defCpeMatch = mapper.readValue(requestString, DefCpeMatch.class);
-        return defCpeMatch;
     }
 
 }
