@@ -5,5 +5,5 @@
 // Generated on: 2021.01.13 at 11:40:26 PM IST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://cwe.mitre.org/cwe-6", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://cwe.mitre.org/cwe-7", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package com.csw.data.mitre.cwe.jaxb;
